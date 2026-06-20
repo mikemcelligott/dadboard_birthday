@@ -222,7 +222,7 @@
 
   #ppa-scroll {
     position: absolute;
-    bottom: -100%;
+    top: 100%;
     width: 90%;
     max-width: 640px;
     font-family: 'Courier New', 'Courier', monospace;
@@ -1208,16 +1208,17 @@
 
   function startPPAScroll() {
     ppaLayer.classList.add('visible');
+    // Text starts at top:100% (bottom of viewport) — translate to 0 to begin
     ppaScrollEl.style.transform = 'translateY(0)';
     ppaStart = performance.now();
 
     function animate() {
       var elapsed = performance.now() - ppaStart;
       var progress = Math.min(elapsed / ppaDuration, 1);
-      // Scroll from 0 to -100% of the text height (moves upward)
+      // Scroll upward: from 0 (text top at viewport bottom) to
+      // -(textHeight + viewportHeight) (text bottom above viewport top)
       var textHeight = ppaScrollEl.offsetHeight;
       var viewportHeight = window.innerHeight;
-      // Start: text bottom at viewport bottom; end: text top above viewport top
       var totalTravel = textHeight + viewportHeight;
       var translateY = -(totalTravel * progress);
       ppaScrollEl.style.transform = 'translateY(' + translateY + 'px)';
