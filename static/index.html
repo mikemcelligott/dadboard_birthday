@@ -42,16 +42,16 @@
 
   #board-wrap {
     position: relative;
-    width: min(70vw, 80vh);
-    height: min(70vw, 80vh);
+    width: min(85vw, 90vh);
+    height: min(85vw, 90vh);
     opacity: 0;
     /* Resting 3D tilt — board reads as a real object lying in perspective */
-    transform: rotateX(42deg);
+    transform: rotateX(55deg);
     transform-style: preserve-3d;
     transition: opacity 2s ease, transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
   }
   #board-wrap.visible { opacity: 1; }
-  #board-wrap.flipped { transform: rotateX(42deg) rotateY(180deg); }
+  #board-wrap.flipped { transform: rotateX(55deg) rotateY(180deg); }
 
   /* ── Accessory LED overlay — descends onto the board in 3D, with thickness ── */
   /* A separate physical layer (the "accessory") that drops down over the board.
@@ -504,7 +504,7 @@
 
   <!-- ── Text layers ──────────────────────────── -->
   <div class="layer" id="layer-opening-1">
-    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years.</div>
+    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years</div>
   </div>
 
   <div class="layer" id="layer-opening-2">
@@ -543,10 +543,6 @@
   <div class="layer" id="layer-f4">
     <div class="feature serif">and can be played across the room or country</div>
   </div>
-  <div class="layer" id="layer-f5">
-    <div class="feature serif">at a fraction of the cost</div>
-    <div class="feature-sub">$300 &ndash; $500</div>
-  </div>
 
   <div class="layer" id="layer-photo">
     <div class="photo-line serif">with a customizable underside</div>
@@ -557,8 +553,8 @@
   </div>
 
   <div class="layer" id="layer-intro-dedication">
-    <div class="dedication-intro serif" id="dedication-part1">Dedicated to dad who made it all possible</div>
-    <div class="dedication-intro serif" id="dedication-part2" style="opacity:0;transition:opacity 1.5s ease;margin-top:0.5rem">, the guy who always holds up the world for everyone around him</div>
+    <div class="dedication-intro serif" id="dedication-part1">Dedicated to the dad who made it all possible..,</div>
+    <div class="dedication-intro serif" id="dedication-part2" style="opacity:0;transition:opacity 1.5s ease;margin-top:0.5rem">the guy who always holds up the world for everyone around him</div>
   </div>
 
   <div class="layer" id="layer-dedication">
@@ -675,6 +671,120 @@
     '            Pro se applicant',
     '',
     '            June 13, 2026',
+    '',
+    '_______________________________________________',
+    '',
+    'BRIEF DESCRIPTION OF THE DRAWINGS',
+    '',
+    'FIG. 1 is a top plan view of a flexible electronic game board',
+    'constructed in accordance with the present invention, shown in',
+    'a flat, unrolled playing configuration on a playing surface.',
+    '',
+    'FIG. 2 is a cross-sectional side elevation view of the flexible',
+    'electronic game board of FIG. 1, taken along line 2-2, showing',
+    'the layered flexible construction including the sensing layer,',
+    'protective layer, and substrate.',
+    '',
+    'FIG. 3 is a detail view of a portion of the sensing surface,',
+    'showing the arrangement of sensing elements at square',
+    'intersections and the routing of conductive traces between',
+    'sensing positions.',
+    '',
+    'FIG. 4 is a schematic diagram of an analog multiplexer-based',
+    'scanning architecture for sequentially reading the sensing',
+    'elements of the flexible electronic game board.',
+    '',
+    'FIG. 5 is a perspective view of the flexible electronic game',
+    'board in a rolled storage configuration, illustrating the',
+    'flexibility and portability of the construction.',
+    '',
+    'FIG. 6 is a block diagram of the electronics module and its',
+    'connection to the sensing surface, wireless transceiver, and',
+    'power supply.',
+    '',
+    'DETAILED DESCRIPTION OF THE INVENTION',
+    '',
+    'The present invention comprises a family of sensing',
+    'architectures for flexible electronic game boards. In the',
+    'following description, numerous specific details are set forth',
+    'to provide a thorough understanding of the invention. However,',
+    'it will be apparent to one skilled in the art that the',
+    'invention may be practiced without these specific details.',
+    '',
+    'In a first embodiment, the sensing surface employs a resistive',
+    'strip bypass architecture in which conductive traces are',
+    'deposited on a flexible substrate in a grid pattern',
+    'corresponding to the playing squares of a standard chess board.',
+    'Each intersection of the grid defines a sensing position.',
+    'A resistive element is placed at each intersection such that',
+    'the presence of a game piece on the corresponding square',
+    'causes a measurable change in electrical resistance at that',
+    'point.',
+    '',
+    'The sensing surface is scanned by an analog multiplexer that',
+    'sequentially connects each sensing position to an analog-to-',
+    'digital converter. The microcontroller reads the resistance',
+    'value at each position and compares it to a calibrated',
+    'baseline to determine whether a piece is present.',
+    '',
+    'In a second embodiment, the sensing surface employs a fractal-',
+    'patterned conductive contact layer in which a fractal geometry',
+    'is used to distribute conductive material across the sensing',
+    'surface. The fractal pattern provides a high ratio of sensing',
+    'area to conductive material, reducing manufacturing cost while',
+    'maintaining sensitivity.',
+    '',
+    'In a third embodiment, electrical impedance tomography is',
+    'applied to the planar game surface. Electrodes are placed at',
+    'the perimeter of the sensing surface, and the impedance',
+    'distribution across the surface is reconstructed from',
+    'boundary measurements. The presence of a game piece creates',
+    'a localized impedance change that is detected by the',
+    'reconstruction algorithm.',
+    '',
+    'In all embodiments, the game state is broadcast wirelessly',
+    'to companion devices using a Bluetooth Low Energy transceiver.',
+    'The electronics module may be permanently embedded in the',
+    'board or provided as a detachable edge module that connects',
+    'to the sensing surface via a board-edge connector.',
+    '',
+    'The entire assembly is constructed from flexible materials',
+    'including a polyimide substrate, screen-printed silver',
+    'conductive traces, and a silicone protective overlay. The',
+    'completed board may be rolled to a diameter of approximately',
+    'three inches for storage and transport.',
+    '',
+    '_______________________________________________',
+    '',
+    'CLAIMS',
+    '',
+    '1. A flexible electronic game board comprising:',
+    'a flexible substrate having a playing surface defined by a',
+    'plurality of playing squares arranged in a grid pattern;',
+    'a sensing layer disposed on said flexible substrate, said',
+    'sensing layer comprising a plurality of sensing elements',
+    'positioned at respective playing squares, each sensing element',
+    'configured to detect the presence of a game piece on the',
+    'corresponding playing square;',
+    'an electronics module electrically coupled to said sensing',
+    'layer, said electronics module configured to sequentially',
+    'scan said sensing elements and determine the presence or',
+    'absence of a game piece at each playing square; and',
+    'a wireless transceiver coupled to said electronics module',
+    'for broadcasting game state information to at least one',
+    'companion device.',
+    '',
+    '2. The flexible electronic game board of claim 1, wherein',
+    'said sensing layer comprises a resistive strip bypass sensing',
+    'architecture.',
+    '',
+    '3. The flexible electronic game board of claim 1, wherein',
+    'said sensing layer comprises a fractal-patterned conductive',
+    'contact layer.',
+    '',
+    '4. The flexible electronic game board of claim 1, wherein',
+    'said sensing layer is configured for electrical impedance',
+    'tomography.',
     '',
     '_______________________________________________'
   ].join('\n');
@@ -846,7 +956,7 @@
   var ppaScrollEl = document.getElementById('ppa-scroll');
   var ppaAnimFrame = null;
   var ppaStart = 0;
-  var ppaDuration = 8000; // ms to scroll through
+  var ppaDuration = 12000; // ms to scroll through — long enough to scroll the whole scene
 
   function initPPAScroll() {
     ppaScrollEl.textContent = PPA_TEXT;
@@ -1067,52 +1177,49 @@
     at(46000,  function () { show('layer-f3'); });   // Remote play
     at(49500,  function () { hide('layer-f3'); });
 
-    at(50000,  function () { show('layer-f4'); });   // Teaches the game
+    at(50000,  function () { show('layer-f4'); });   // and can be played
     at(53500,  function () { hide('layer-f4'); });
 
-    at(54000,  function () { show('layer-f5'); });   // Fraction of the cost
-    at(57500,  function () { hide('layer-f5'); });
-
-    // Scene 7: Photo scene — board flips, photos laid out on the back (58000 – 77000)
-    at(58000,  function () {
+    // Scene 7: Photo scene — board flips, photos laid out on the back (54000 – 73000)
+    at(54000,  function () {
       show('layer-photo');  // "with a customizable underside"
     });
-    at(60000,  function () {
+    at(56000,  function () {
       // Flip the board to reveal the underside
       flipBoard();
     });
-    at(63000,  function () {
+    at(59000,  function () {
       hide('layer-photo');
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
-    at(68000,  function () {
+    at(64000,  function () {
       show('layer-photo-2');  // "it remembers more than just games"
     });
-    at(74000,  function () {
+    at(70000,  function () {
       hide('layer-photo-2');
     });
-    at(77000,  function () {
+    at(73000,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 8: Dedication build-up (78000 – 95000)
-    at(78000,  function () {
-      show('layer-intro-dedication');  // "Dedicated to dad who made it all possible"
+    // Scene 8: Dedication build-up (74000 – 93000)
+    at(74000,  function () {
+      show('layer-intro-dedication');  // "Dedicated to the dad who made it all possible..,"
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(84000,  function () {
+    at(80000,  function () {
       // Beat — reveal the continuation
       document.getElementById('dedication-part2').style.opacity = '1';
     });
-    at(92000,  function () {
+    at(88000,  function () {
       // Transition to final "dedicated to" reveal
       hide('layer-intro-dedication');
       show('layer-dedication');
     });
-    at(97000,  function () {
+    at(93000,  function () {
       startNicknameCarousel();
     });
   }
