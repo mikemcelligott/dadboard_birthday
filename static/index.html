@@ -1365,93 +1365,93 @@
     at(14750,  function () {
       document.getElementById('date-day-el').style.opacity = '1';   // "13"
     });
-    at(19500,  function () {
+    at(15500,  function () {
       hide('layer-date');
       stopPPAScroll();
     });
 
-    // Scene 4: Board fades in + accessory descends + title + LEDs (20000 – 28000)
-    at(20000,  function () {
+    // Scene 4: Board fades in + accessory descends + title + LEDs (16000 – 24000)
+    at(16000,  function () {
       document.getElementById('board-wrap').classList.add('visible');
       document.getElementById('accessory-overlay').classList.add('landed');
     });
-    at(21000,  function () { show('layer-title'); });       // "introducing a roll-out board that remembers"
-    at(22000,  function () {
+    at(17000,  function () { show('layer-title'); });       // "introducing a roll-out board that remembers"
+    at(18000,  function () {
       waveOn('green', 40);
     });
-    at(24000,  function () {
+    at(20000,  function () {
       hide('layer-title');
       show('layer-title-2');                                 // "the dadboard"
     });
-    at(25500,  function () {
+    at(21500,  function () {
       allLedsOff();
     });
-    at(27500,  function () { hide('layer-title-2'); });
+    at(23500,  function () { hide('layer-title-2'); });
 
-    // Scene 5: The move — e2 → e4 (28000 – 34000)
-    at(28000,  function () { show('layer-move'); });
-    at(28500,  function () {
+    // Scene 5: The move — e2 → e4 (24000 – 30000)
+    at(24000,  function () { show('layer-move'); });
+    at(24500,  function () {
       ledOn(6, 4, 'amber');  // e2
     });
-    at(29500,  function () {
+    at(25500,  function () {
       ledOn(4, 4, 'green');  // e4
     });
-    at(33500,  function () {
+    at(29500,  function () {
       hide('layer-move');
       ledOff(6, 4);
       ledOff(4, 4);
     });
 
-    // Scene 6: Features — one per beat (34500 – 44500)
-    at(34500,  function () { show('layer-f2'); });   // works with your pieces
-    at(38000,  function () { hide('layer-f2'); });
+    // Scene 6: Features — one per beat (30500 – 40500)
+    at(30500,  function () { show('layer-f2'); });   // works with your pieces
+    at(34000,  function () { hide('layer-f2'); });
 
-    at(38500,  function () { show('layer-f3'); });   // teaches the game
-    at(42000,  function () { hide('layer-f3'); });
+    at(34500,  function () { show('layer-f3'); });   // teaches the game
+    at(38000,  function () { hide('layer-f3'); });
 
-    at(42500,  function () { show('layer-f4'); });   // supports remote play
-    at(46000,  function () { hide('layer-f4'); });
+    at(38500,  function () { show('layer-f4'); });   // supports remote play
+    at(42000,  function () { hide('layer-f4'); });
 
-    // Scene 7: Photo scene — board flips, photos laid out on the back (46500 – 65500)
-    at(46500,  function () {
+    // Scene 7: Photo scene — board flips, photos laid out on the back (42500 – 61500)
+    at(42500,  function () {
       show('layer-photo');  // "and with a customizable underside"
     });
-    at(48500,  function () {
+    at(44500,  function () {
       // Flip the board to reveal the underside
       flipBoard();
     });
-    at(51500,  function () {
+    at(47500,  function () {
       hide('layer-photo');
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
-    at(56500,  function () {
+    at(52500,  function () {
       show('layer-photo-2');  // "can remember more than just games"
     });
-    at(62500,  function () {
+    at(58500,  function () {
       hide('layer-photo-2');
     });
-    at(65500,  function () {
+    at(61500,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 8: Dedication build-up (66500 – 85500)
-    at(66500,  function () {
+    // Scene 8: Dedication build-up (62500 – 81500)
+    at(62500,  function () {
       show('layer-intro-dedication');  // "Dedicated to the dad who made it all possible..,"
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(72500,  function () {
+    at(68500,  function () {
       // Beat — reveal the continuation
       document.getElementById('dedication-part2').style.opacity = '1';
     });
-    at(80500,  function () {
+    at(76500,  function () {
       // Transition to final "dedicated to" reveal
       hide('layer-intro-dedication');
       show('layer-dedication');
     });
-    at(85500,  function () {
+    at(81500,  function () {
       startNicknameCarousel();
     });
   }
