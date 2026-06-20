@@ -1230,10 +1230,15 @@
   }
 
   function stopPPAScroll() {
+    // Start the fade-out (CSS opacity transition, 1.5s) but keep scrolling.
+    // The text continues moving while the layer fades — no janky freeze.
     ppaLayer.classList.remove('visible');
+    // Cancel the animation only after the fade completes
     if (ppaAnimFrame) {
-      cancelAnimationFrame(ppaAnimFrame);
-      ppaAnimFrame = null;
+      setTimeout(function () {
+        cancelAnimationFrame(ppaAnimFrame);
+        ppaAnimFrame = null;
+      }, 1600);
     }
   }
 
