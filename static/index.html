@@ -539,10 +539,6 @@
     <div class="move-label">it sees every move</div>
   </div>
 
-  <div class="layer" id="layer-capture">
-    <div class="move-label">knows when a piece is taken</div>
-  </div>
-
   <div class="layer" id="layer-f1">
     <div class="feature serif">rolls up</div>
   </div>
@@ -1239,73 +1235,59 @@
       ledOff(4, 4);
     });
 
-    // Scene 5b: Capture sequence (34000 – 38500)
-    at(34000,  function () { show('layer-capture'); });
-    at(34500,  function () {
-      ledOn(4, 4, 'amber');  // e4 — from
-    });
-    at(35500,  function () {
-      ledOn(3, 3, 'green');  // d5 — to (capture)
-    });
-    at(38000,  function () {
-      hide('layer-capture');
-      ledOff(4, 4);
-      ledOff(3, 3);
-    });
+    // Scene 6: Features — one per beat (34500 – 49000)
+    at(34500,  function () { show('layer-f1'); });   // rolls up
+    at(38000,  function () { hide('layer-f1'); });
 
-    // Scene 6: Features — one per beat (39000 – 53500)
-    at(39000,  function () { show('layer-f1'); });   // rolls up
-    at(42500,  function () { hide('layer-f1'); });
+    at(38500,  function () { show('layer-f2'); });   // works with your pieces
+    at(42000,  function () { hide('layer-f2'); });
 
-    at(43000,  function () { show('layer-f2'); });   // works with your pieces
-    at(46500,  function () { hide('layer-f2'); });
+    at(42500,  function () { show('layer-f3'); });   // teaches the game
+    at(46000,  function () { hide('layer-f3'); });
 
-    at(47000,  function () { show('layer-f3'); });   // teaches the game
-    at(50500,  function () { hide('layer-f3'); });
+    at(46500,  function () { show('layer-f4'); });   // supports remote play
+    at(50000,  function () { hide('layer-f4'); });
 
-    at(51000,  function () { show('layer-f4'); });   // supports remote play
-    at(54500,  function () { hide('layer-f4'); });
-
-    // Scene 7: Photo scene — board flips, photos laid out on the back (55000 – 74000)
-    at(55000,  function () {
+    // Scene 7: Photo scene — board flips, photos laid out on the back (50500 – 69500)
+    at(50500,  function () {
       show('layer-photo');  // "with a customizable underside"
     });
-    at(57000,  function () {
+    at(52500,  function () {
       // Flip the board to reveal the underside
       flipBoard();
     });
-    at(60000,  function () {
+    at(55500,  function () {
       hide('layer-photo');
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
-    at(65000,  function () {
+    at(60500,  function () {
       show('layer-photo-2');  // "it remembers more than just games"
     });
-    at(71000,  function () {
+    at(66500,  function () {
       hide('layer-photo-2');
     });
-    at(74000,  function () {
+    at(69500,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 8: Dedication build-up (75000 – 94000)
-    at(75000,  function () {
+    // Scene 8: Dedication build-up (70500 – 89500)
+    at(70500,  function () {
       show('layer-intro-dedication');  // "Dedicated to the dad who made it all possible..,"
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(81000,  function () {
+    at(76500,  function () {
       // Beat — reveal the continuation
       document.getElementById('dedication-part2').style.opacity = '1';
     });
-    at(89000,  function () {
+    at(84500,  function () {
       // Transition to final "dedicated to" reveal
       hide('layer-intro-dedication');
       show('layer-dedication');
     });
-    at(94000,  function () {
+    at(89500,  function () {
       startNicknameCarousel();
     });
   }
