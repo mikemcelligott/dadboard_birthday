@@ -392,6 +392,16 @@
     font-style: italic;
     margin-top: 1rem;
   }
+  .dedication-thanks {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--ink);
+    margin-top: 2.5rem;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
+  .dedication-thanks.visible { opacity: 1; }
 
   .dedication-intro {
     font-size: clamp(1.4rem, 3.2vw, 2.3rem);
@@ -563,6 +573,7 @@
     <div class="dedication-top serif">Dedicated to</div>
     <div class="dedication-name serif" id="dedication-name">Mike Sr.</div>
     <div class="dedication-bottom serif">for his 80th birthday.</div>
+    <div class="dedication-thanks serif" id="dedication-thanks">Thanks For All Of It, Dad</div>
   </div>
 
 </div>
@@ -788,7 +799,76 @@
     'said sensing layer is configured for electrical impedance',
     'tomography.',
     '',
-    '_______________________________________________'
+    '5. The flexible electronic game board of claim 1, wherein',
+    'said electronics module is detachably coupled to said sensing',
+    'layer via a board-edge connector.',
+    '',
+    '6. The flexible electronic game board of claim 1, wherein',
+    'said wireless transceiver is a Bluetooth Low Energy',
+    'transceiver.',
+    '',
+    '7. The flexible electronic game board of claim 1, wherein',
+    'said flexible substrate comprises a polyimide film.',
+    '',
+    '8. The flexible electronic game board of claim 1, wherein',
+    'said sensing elements are configured to detect a weight of',
+    'a game piece placed on the corresponding playing square,',
+    'thereby enabling weight-based piece identity inference.',
+    '',
+    '9. The flexible electronic game board of claim 1, further',
+    'comprising a protective silicone overlay disposed over said',
+    'sensing layer.',
+    '',
+    '10. A method of detecting game piece positions on a flexible',
+    'electronic game board, the method comprising:',
+    'providing a flexible substrate having a plurality of sensing',
+    'elements arranged in a grid pattern corresponding to playing',
+    'squares;',
+    'sequentially scanning said sensing elements using an analog',
+    'multiplexer to obtain resistance values;',
+    'comparing each resistance value to a calibrated baseline to',
+    'determine the presence or absence of a game piece at each',
+    'playing square;',
+    'constructing a game state representation from the detected',
+    'piece positions; and',
+    'broadcasting said game state representation wirelessly to at',
+    'least one companion device.',
+    '',
+    '11. The method of claim 10, further comprising inferring the',
+    'identity of a game piece based on a weight measurement',
+    'obtained from the sensing element at the corresponding',
+    'playing square.',
+    '',
+    '12. The method of claim 10, further comprising calibrating',
+    'said baseline resistance values by scanning said sensing',
+    'elements in an unoccupied state prior to gameplay.',
+    '',
+    'ABSTRACT',
+    '',
+    'A flexible, rollable electronic game board that detects the',
+    'presence and position of game pieces across a grid of playing',
+    'squares using resistive sensing, fractal-patterned conductive',
+    'layers, or electrical impedance tomography. The board is',
+    'constructed entirely from flexible materials enabling rolled',
+    'storage. Game state is broadcast wirelessly to companion',
+    'devices and paired remote boards. The board operates with',
+    'standard unmodified game pieces and requires no per-square',
+    'discrete electronic components in the sensing surface,',
+    'achieving a manufacturing cost substantially below that of',
+    'existing electronic game boards.',
+    '',
+    '_______________________________________________',
+    '',
+    'INVENTOR\'S NOTE',
+    '',
+    'This invention was inspired by a lifetime of chess games',
+    'played between father and son — thousands of games across',
+    'thousands of years of tradition, now given a new form.',
+    '',
+    'The board that remembers is, in the end, a board that',
+    'remembers the people who played on it.',
+    '',
+    '_______________________________________________',
   ].join('\n');
 
   // ── Build the board ────────────────────────────
@@ -1283,15 +1363,20 @@
 
   // Show entry[k], dwell for entry[k].ms, then advance — recursive setTimeout
   // so each name's display duration is driven by its own ms in the JSONL.
+  // After the last nickname, stop and reveal "Thanks For All Of It, Dad".
   function rotateNickname() {
-    if (nicknameIndex >= nicknames.length) nicknameIndex = 0;
+    if (nicknameIndex >= nicknames.length) {
+      // Cycled through all nicknames — stop on the last one and show thanks
+      var thanksEl = document.getElementById('dedication-thanks');
+      if (thanksEl) thanksEl.classList.add('visible');
+      return;
+    }
     var entry = nicknames[nicknameIndex];
     nameEl.style.opacity = '0';
     setTimeout(function () {
       nameEl.textContent = entry.name;
       nameEl.style.opacity = '1';
       nicknameIndex++;
-      // Schedule the next rotation after THIS name's dwell time.
       carouselTimer = setTimeout(rotateNickname, entry.ms);
     }, 600);
   }
