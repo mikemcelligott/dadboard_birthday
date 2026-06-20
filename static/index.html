@@ -208,10 +208,11 @@
     font-family: 'Courier New', 'Courier', monospace;
     font-size: clamp(0.6rem, 1.3vw, 0.8rem);
     line-height: 2.2;
-    color: #2a2a2a;
+    color: #4a4a4a;
     text-align: center;
     white-space: pre-line;
     will-change: transform;
+    text-shadow: 0 0 12px rgba(90,90,90,0.5), 0 0 30px rgba(60,60,60,0.3);
   }
 
   /* ── Text layers ──────────────────────────────── */
@@ -230,6 +231,11 @@
     z-index: 10;
   }
   .layer.visible { opacity: 1; }
+
+  /* Drop shadow on all reveal text so it reads against the board + photos */
+  .layer div {
+    text-shadow: 0 2px 12px rgba(0,0,0,0.75), 0 0 24px rgba(0,0,0,0.35);
+  }
 
   .serif { font-family: 'Georgia', 'Times New Roman', serif; }
   .sans  { font-family: 'Helvetica Neue', 'Arial', sans-serif; }
@@ -278,7 +284,7 @@
     position: relative;
     z-index: 11;
   }
-  .date-day {
+  .layer .date-day {
     font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 400;
     color: var(--led-green);
@@ -286,7 +292,7 @@
     letter-spacing: 0.04em;
     position: relative;
     z-index: 11;
-    text-shadow: 0 0 30px rgba(0, 224, 80, 0.3);
+    text-shadow: 0 0 30px rgba(0, 224, 80, 0.3), 0 2px 12px rgba(0,0,0,0.75);
   }
 
   .move-label {
