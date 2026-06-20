@@ -42,16 +42,16 @@
 
   #board-wrap {
     position: relative;
-    width: min(60vmin, 600px);
-    height: min(60vmin, 600px);
+    width: min(70vw, 80vh);
+    height: min(70vw, 80vh);
     opacity: 0;
     /* Resting 3D tilt — board reads as a real object lying in perspective */
-    transform: rotateX(22deg);
+    transform: rotateX(42deg);
     transform-style: preserve-3d;
     transition: opacity 2s ease, transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
   }
   #board-wrap.visible { opacity: 1; }
-  #board-wrap.flipped { transform: rotateX(22deg) rotateY(180deg); }
+  #board-wrap.flipped { transform: rotateX(42deg) rotateY(180deg); }
 
   /* ── Accessory LED overlay — descends onto the board in 3D, with thickness ── */
   /* A separate physical layer (the "accessory") that drops down over the board.
@@ -164,6 +164,7 @@
     gap: 2%;
     padding: 2%;
     z-index: 2;
+    transform: rotate(-4deg);
     /* columns/rows set inline by JS based on photo count */
   }
 
@@ -288,11 +289,10 @@
     font-weight: 400;
     color: var(--ink);
     letter-spacing: 0.02em;
-    font-style: italic;
   }
 
   .title {
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2rem, 5.5vw, 4.5rem);
     font-weight: 400;
     letter-spacing: 0.02em;
     color: var(--ink);
@@ -520,16 +520,15 @@
 
   <!-- ── Text layers ──────────────────────────── -->
   <div class="layer" id="layer-opening-1">
-    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years.</div>
+    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years..</div>
   </div>
 
   <div class="layer" id="layer-opening-2">
-    <div class="opening-transition serif">Now there's a new way to play.</div>
+    <div class="opening-transition serif">And there's a new way to play.</div>
   </div>
 
   <div class="layer" id="layer-title">
-    <div class="title-prefix">Introducing</div>
-    <div class="title serif">dadboard</div>
+    <div class="title serif">Introducing the dadboard</div>
     <div class="subtitle">the roll-out board that remembers.</div>
   </div>
 
@@ -542,25 +541,24 @@
 
   <div class="layer" id="layer-move">
     <div class="move-label">It sees every move</div>
-    <div class="move-sub">e2 &rarr; e4 &nbsp; &middot; &nbsp; the game begins</div>
   </div>
 
   <div class="layer" id="layer-capture">
-    <div class="move-label">It knows when a piece is taken</div>
+    <div class="move-label">Knows when a piece is taken</div>
     <div class="move-sub">no camera, no RFID &nbsp; &middot; &nbsp; it just knows</div>
   </div>
 
   <div class="layer" id="layer-f1">
-    <div class="feature serif">It rolls up.</div>
+    <div class="feature serif">Rolls up.</div>
   </div>
   <div class="layer" id="layer-f2">
     <div class="feature serif">Works with the pieces you already own.</div>
   </div>
   <div class="layer" id="layer-f3">
-    <div class="feature serif">Play across the room &mdash; or across the country.</div>
+    <div class="feature serif">And can be played across the room or the country.</div>
   </div>
   <div class="layer" id="layer-f4">
-    <div class="feature serif">It teaches the game.</div>
+    <div class="feature serif">Teaches the game.</div>
   </div>
   <div class="layer" id="layer-f5">
     <div class="feature serif">A fraction of the cost.</div>
@@ -1017,8 +1015,8 @@
     at(14000,  function () {
       document.getElementById('date-on-el').style.opacity = '1';   // "on June"
     });
-    // Dramatic pause before the day number — the filing date reveal
-    at(17500,  function () {
+    // Brief beat before the day number — the filing date reveal
+    at(15500,  function () {
       document.getElementById('date-day-el').style.opacity = '1';   // "13"
     });
     at(19500,  function () {
