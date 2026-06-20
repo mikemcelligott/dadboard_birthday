@@ -254,11 +254,36 @@
     margin-top: 1.5rem;
   }
 
+  /* ── Opening prose (history → transition) ─────── */
+  .opening-prose {
+    font-size: clamp(1.3rem, 3.5vw, 2.4rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+    max-width: 80vw;
+  }
+  .opening-transition {
+    font-size: clamp(1.5rem, 4vw, 2.8rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+
   .title {
     font-size: clamp(3rem, 8vw, 6rem);
     font-weight: 400;
     letter-spacing: 0.02em;
     color: var(--ink);
+  }
+  .title-prefix {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--muted);
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
   }
   .subtitle {
     font-size: clamp(1rem, 2.5vw, 1.5rem);
@@ -268,6 +293,16 @@
     letter-spacing: 0.03em;
   }
 
+  .date-prefix {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--muted);
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    position: relative;
+    z-index: 11;
+  }
   .date-year {
     font-size: clamp(3rem, 7vw, 5rem);
     font-weight: 400;
@@ -455,20 +490,25 @@
   </div>
 
   <!-- ── Text layers ──────────────────────────── -->
-  <div class="layer" id="layer-for-dad">
-    <div class="for-dad serif">For Dad.</div>
-    <div class="birthday-line serif">On his 80th birthday.</div>
+  <div class="layer" id="layer-opening-1">
+    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years.</div>
+  </div>
+
+  <div class="layer" id="layer-opening-2">
+    <div class="opening-transition serif">Now there's a new way to play.</div>
   </div>
 
   <div class="layer" id="layer-title">
+    <div class="title-prefix">Introducing</div>
     <div class="title serif">dadboard</div>
-    <div class="subtitle">A chess board that knows what just happened.</div>
+    <div class="subtitle">the roll-out board that remembers.</div>
   </div>
 
   <div class="layer" id="layer-date">
+    <div class="date-prefix">Intellectual Property filed in</div>
     <div class="date-year serif" id="date-year-el">2026</div>
-    <div class="date-on serif" id="date-on-el" style="opacity:0;transition:opacity 1s ease">on</div>
-    <div class="date-day serif" id="date-day-el" style="opacity:0;transition:opacity 1s ease">June 13</div>
+    <div class="date-on serif" id="date-on-el" style="opacity:0;transition:opacity 1s ease">on June</div>
+    <div class="date-day serif" id="date-day-el" style="opacity:0;transition:opacity 1s ease">13</div>
   </div>
 
   <div class="layer" id="layer-move">
@@ -886,113 +926,114 @@
 
   // ── Build the timeline (all times in ms) ───────
   function buildTimeline() {
-    // Scene 1: Black — "For Dad." (0 – 5000)
-    at(0,      function () { show('layer-for-dad'); });
-    at(4500,   function () { hide('layer-for-dad'); });
+    // Scene 1: "Fathers have been teaching sons..." (0 – 6000)
+    at(0,      function () { show('layer-opening-1'); });
+    at(5500,   function () { hide('layer-opening-1'); });
 
-    // Scene 2: Board fades in (3D tilt) + accessory LED grid descends onto it
-    at(5000,   function () {
-      document.getElementById('board-wrap').classList.add('visible');
-      document.getElementById('accessory-overlay').classList.add('landed');
-    });
+    // Scene 2: "Now there's a new way to play." (6500 – 10500)
+    at(6500,   function () { show('layer-opening-2'); });
+    at(10000,  function () { hide('layer-opening-2'); });
 
-    // Scene 3: Lights come on — wave (7000 – 11000)
-    at(7000,   function () {
-      waveOn('green', 40);
-    });
-    at(10500,  function () {
-      allLedsOff();
-    });
-
-    // Scene 4: Title (11000 – 16000)
-    at(11500,  function () { show('layer-title'); });
-    at(15500,  function () { hide('layer-title'); });
-
-    // Scene 5: Date reveal with PPA scroll behind (16000 – 24000)
-    at(16000,  function () {
+    // Scene 3: IP filing date with PPA scroll behind (11000 – 20000)
+    at(11000,  function () {
       show('layer-date');
       startPPAScroll();
     });
-    at(18500,  function () {
-      document.getElementById('date-on-el').style.opacity = '1';
+    at(14000,  function () {
+      document.getElementById('date-on-el').style.opacity = '1';   // "on June"
     });
-    at(20000,  function () {
-      document.getElementById('date-day-el').style.opacity = '1';
+    // Dramatic pause before the day number — the filing date reveal
+    at(17500,  function () {
+      document.getElementById('date-day-el').style.opacity = '1';   // "13"
     });
-    at(23500,  function () {
+    at(19500,  function () {
       hide('layer-date');
       stopPPAScroll();
     });
 
-    // Scene 6: The move — e2 → e4 (24000 – 30000)
-    at(24000,  function () { show('layer-move'); });
-    at(24500,  function () {
-      ledOn(6, 4, 'amber');  // e2
+    // Scene 4: Board fades in + accessory descends + title + LEDs (20000 – 26500)
+    at(20000,  function () {
+      document.getElementById('board-wrap').classList.add('visible');
+      document.getElementById('accessory-overlay').classList.add('landed');
+    });
+    at(21000,  function () { show('layer-title'); });
+    at(22000,  function () {
+      waveOn('green', 40);
     });
     at(25500,  function () {
+      allLedsOff();
+    });
+    at(26000,  function () { hide('layer-title'); });
+
+    // Scene 5: The move — e2 → e4 (27000 – 33000)
+    at(27000,  function () { show('layer-move'); });
+    at(27500,  function () {
+      ledOn(6, 4, 'amber');  // e2
+    });
+    at(28500,  function () {
       ledOn(4, 4, 'green');  // e4
     });
-    at(29500,  function () {
+    at(32500,  function () {
       hide('layer-move');
       ledOff(6, 4);
       ledOff(4, 4);
     });
 
-    // Scene 6b: Capture sequence (30000 – 34500)
-    at(30000,  function () { show('layer-capture'); });
-    at(30500,  function () {
+    // Scene 5b: Capture sequence (33000 – 37500)
+    at(33000,  function () { show('layer-capture'); });
+    at(33500,  function () {
       ledOn(4, 4, 'amber');  // e4 — from
     });
-    at(31500,  function () {
+    at(34500,  function () {
       ledOn(3, 3, 'green');  // d5 — to (capture)
     });
-    at(34000,  function () {
+    at(37000,  function () {
       hide('layer-capture');
       ledOff(4, 4);
       ledOff(3, 3);
     });
 
-    // Scene 7: Features — one per beat (35000 – 53000)
-    at(35000,  function () { show('layer-f1'); });   // Rolls up
-    at(38500,  function () { hide('layer-f1'); });
+    // Scene 6: Features — one per beat (38000 – 56000)
+    at(38000,  function () { show('layer-f1'); });   // Rolls up
+    at(41500,  function () { hide('layer-f1'); });
 
-    at(39000,  function () { show('layer-f2'); });   // Works with your pieces
-    at(42500,  function () { hide('layer-f2'); });
+    at(42000,  function () { show('layer-f2'); });   // Works with your pieces
+    at(45500,  function () { hide('layer-f2'); });
 
-    at(43000,  function () { show('layer-f3'); });   // Remote play
-    at(46500,  function () { hide('layer-f3'); });
+    at(46000,  function () { show('layer-f3'); });   // Remote play
+    at(49500,  function () { hide('layer-f3'); });
 
-    at(47000,  function () { show('layer-f4'); });   // Teaches the game
-    at(50500,  function () { hide('layer-f4'); });
+    at(50000,  function () { show('layer-f4'); });   // Teaches the game
+    at(53500,  function () { hide('layer-f4'); });
 
-    at(51000,  function () { show('layer-f5'); });   // Fraction of the cost
-    at(54500,  function () { hide('layer-f5'); });
+    at(54000,  function () { show('layer-f5'); });   // Fraction of the cost
+    at(57500,  function () { hide('layer-f5'); });
 
-    // Scene 8: Photo scene — board flips, photos laid out on the back (55000 – 74000)
-    at(55000,  function () {
+    // Scene 7: Photo scene — board flips, photos laid out on the back (58000 – 77000)
+    at(58000,  function () {
       show('layer-photo');
     });
-    at(57000,  function () {
+    at(60000,  function () {
       // Flip the board to reveal the underside
       flipBoard();
     });
-    at(60000,  function () {
+    at(63000,  function () {
       hide('layer-photo');
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
-    at(74000,  function () {
+    at(77000,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 9: Dedication (77000 – 87000)
-    at(77000,  function () {
+    // Scene 8: Dedication (80000 – 90000)
+    at(80000,  function () {
       show('layer-dedication');
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(87000,  function () {
+    at(90000,  function () {
       startNicknameCarousel();
     });
   }
