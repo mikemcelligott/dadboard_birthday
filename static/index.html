@@ -45,11 +45,59 @@
     width: min(60vmin, 600px);
     height: min(60vmin, 600px);
     opacity: 0;
-    transition: opacity 2s ease, transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+    /* Resting 3D tilt — board reads as a real object lying in perspective */
+    transform: rotateX(22deg);
     transform-style: preserve-3d;
+    transition: opacity 2s ease, transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
   }
   #board-wrap.visible { opacity: 1; }
-  #board-wrap.flipped { transform: rotateY(180deg); }
+  #board-wrap.flipped { transform: rotateX(22deg) rotateY(180deg); }
+
+  /* ── Accessory LED overlay — descends onto the board in 3D, with thickness ── */
+  /* A separate physical layer (the "accessory") that drops down over the board.
+     Sits at translateZ(40px) above the board surface; starts above and drops in. */
+  #accessory-overlay {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: translateY(-130%) translateZ(120px);
+    transition: transform 1.8s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.6s ease;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+    z-index: 5;
+  }
+  #accessory-overlay.landed { transform: translateY(0) translateZ(40px); }
+  #accessory-overlay.hidden { opacity: 0; }
+
+  /* Thickness slab: a dark semi-transparent backing slightly behind the LEDs,
+     giving the overlay a physical extruded feel rather than a flat decal. */
+  #accessory-frame {
+    position: absolute;
+    inset: -3%;
+    background: linear-gradient(135deg, rgba(15,18,22,0.74), rgba(8,10,12,0.84));
+    border: 1px solid rgba(200,210,225,0.16);
+    border-radius: 6px;
+    transform: translateZ(-8px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.55);
+  }
+  #accessory-frame::after {
+    /* top edge highlight — sells the extruded slab look */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-top: 2px solid rgba(200,210,225,0.28);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  /* LEDs live in their own SVG on the front face of the slab */
+  #leds-svg {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform: translateZ(2px);
+  }
 
   #board-front, #board-back {
     position: absolute;
@@ -87,43 +135,55 @@
 
   /* ── Photo on board back ──────────────────────── */
 
+  /* Photo grid on the board back — all photos laid out at once, dealt in fast */
   #photo-display {
     position: relative;
-    width: 72%;
-    height: 72%;
+    width: 92%;
+    height: 92%;
+    display: grid;
+    gap: 2%;
+    padding: 2%;
+    z-index: 2;
+    /* columns/rows set inline by JS based on photo count */
+  }
+
+  .photo-tile {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
-  }
-
-  #photo-img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 2px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
     opacity: 0;
-    transition: opacity 1.2s ease, filter 2s ease;
-    filter: none;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    transform: scale(0.82) translateY(18px);
+    transition: opacity 0.45s ease,
+                transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1),
+                filter 1.4s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
   }
-  #photo-img.visible { opacity: 1; }
-  #photo-img.bw { filter: grayscale(1) contrast(1.05) brightness(0.95); }
+  .photo-tile.placed { opacity: 1; transform: scale(1) translateY(0); }
+  /* "Settled" = the montage moment — all tiles desaturate together */
+  #photo-display.settled .photo-tile { filter: grayscale(1) contrast(1.05) brightness(0.95); }
 
-  #photo-caption {
+  .photo-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .photo-tile .photo-caption {
     position: absolute;
-    bottom: -2.5em;
+    bottom: 4%;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Georgia', serif;
-    font-size: clamp(0.8rem, 1.8vw, 1.1rem);
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    opacity: 0;
-    transition: opacity 1s ease;
+    font-size: clamp(0.55rem, 1.1vw, 0.85rem);
+    color: rgba(232,228,216,0.75);
+    letter-spacing: 0.08em;
     white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
-  #photo-caption.visible { opacity: 0.7; }
 
   /* ── PPA scroll text (behind date) ────────────── */
 
@@ -360,20 +420,26 @@
 
 <div id="stage">
 
-  <!-- ── Chess board with 3D flip ──────────────── -->
+  <!-- ── Chess board with 3D tilt + flip ───────── -->
   <div id="board-wrap">
     <div id="board-front">
       <svg id="board-svg" viewBox="0 0 700 700" preserveAspectRatio="xMidYMid meet">
         <g id="squares"></g>
         <g id="grid" stroke="rgba(200,200,210,0.35)" stroke-width="2.5" fill="none"></g>
-        <g id="leds"></g>
       </svg>
     </div>
     <div id="board-back">
-      <div id="photo-display">
-        <img id="photo-img" alt="" />
-        <div id="photo-caption"></div>
-      </div>
+      <!-- Photo grid fills this at runtime (layoutPhotos) -->
+      <div id="photo-display"></div>
+    </div>
+
+    <!-- Accessory LED grid — a separate physical layer that descends onto the
+         board in 3D, with thickness. Sits above the board surface (translateZ). -->
+    <div id="accessory-overlay">
+      <div id="accessory-frame"></div>
+      <svg id="leds-svg" viewBox="0 0 700 700" preserveAspectRatio="xMidYMid meet">
+        <g id="leds"></g>
+      </svg>
     </div>
   </div>
 
@@ -660,9 +726,12 @@
   // ── Board flip ─────────────────────────────────
   function flipBoard() {
     document.getElementById('board-wrap').classList.add('flipped');
+    // Hide the accessory LED overlay while the back is showing
+    document.getElementById('accessory-overlay').classList.add('hidden');
   }
   function unflipBoard() {
     document.getElementById('board-wrap').classList.remove('flipped');
+    document.getElementById('accessory-overlay').classList.remove('hidden');
   }
 
   // ── PPA scroll ─────────────────────────────────
@@ -706,12 +775,8 @@
     }
   }
 
-  // ── Photo montage ──────────────────────────────
+  // ── Photo grid (laid out on the board back) ────
   var photos = [];
-  var photoIndex = 0;
-  var photoImg = document.getElementById('photo-img');
-  var photoCaption = document.getElementById('photo-caption');
-  var photoTimer = null;
 
   function loadPhotos(callback) {
     fetch(PHOTOS_URL, { cache: 'no-cache' })
@@ -736,59 +801,56 @@
       });
   }
 
-  function showNextPhoto() {
+  // Pick a grid shape (cols × rows) that fits N photos snugly.
+  function pickGrid(n) {
+    if (n <= 4)  return { c: 2, r: 2 };
+    if (n <= 6)  return { c: 3, r: 2 };
+    if (n <= 9)  return { c: 3, r: 3 };
+    if (n <= 12) return { c: 4, r: 3 };
+    return { c: 4, r: Math.ceil(n / 4) };
+  }
+
+  // Lay out every photo on the board back at once, dealing them in fast.
+  // All photos appear (no "only 3 fit" cutoff), and the layout completes
+  // in (150 + N×250) ms — roughly 20× faster than the old 5 s/photo cycle.
+  function layoutPhotos() {
     if (photos.length === 0) return;
-    if (photoIndex >= photos.length) photoIndex = 0;
+    var grid = document.getElementById('photo-display');
+    grid.innerHTML = '';
+    grid.classList.remove('settled');
+    var g = pickGrid(photos.length);
+    grid.style.gridTemplateColumns = 'repeat(' + g.c + ', 1fr)';
+    grid.style.gridTemplateRows = 'repeat(' + g.r + ', 1fr)';
 
-    var p = photos[photoIndex];
+    var stagger = 250; // ms per tile
+    photos.forEach(function (p, i) {
+      var tile = document.createElement('div');
+      tile.className = 'photo-tile';
+      var img = document.createElement('img');
+      img.src = p.file; img.alt = '';
+      img.onerror = function () { tile.style.display = 'none'; };
+      tile.appendChild(img);
+      if (p.caption) {
+        var cap = document.createElement('div');
+        cap.className = 'photo-caption';
+        cap.textContent = p.caption;
+        tile.appendChild(cap);
+      }
+      grid.appendChild(tile);
+      setTimeout(function () { tile.classList.add('placed'); }, 150 + i * stagger);
+    });
 
-    // Fade out current
-    photoImg.classList.remove('visible');
-    photoCaption.classList.remove('visible');
-
-    setTimeout(function () {
-      // Reset to color
-      photoImg.classList.remove('bw');
-      photoImg.src = p.file;
-
-      photoImg.onload = function () {
-        // Fade in in color
-        photoImg.classList.add('visible');
-
-        // Show caption if present
-        if (p.caption) {
-          photoCaption.textContent = p.caption;
-          photoCaption.classList.add('visible');
-        }
-
-        // After a beat, desaturate to B&W — "settling into the material"
-        setTimeout(function () {
-          photoImg.classList.add('bw');
-        }, 1800);
-      };
-      photoImg.onerror = function () {
-        // Skip broken images
-        photoIndex++;
-        if (photoIndex < photos.length) showNextPhoto();
-      };
-
-      photoIndex++;
-    }, 1000);
+    // After the last tile lands + a beat, desaturate the whole grid together.
+    var settleAt = 150 + photos.length * stagger + 1200;
+    setTimeout(function () { grid.classList.add('settled'); }, settleAt);
   }
 
-  function startPhotoMontage() {
-    photoIndex = 0;
-    showNextPhoto();
-    photoTimer = setInterval(showNextPhoto, 5000);
-  }
-
-  function stopPhotoMontage() {
-    if (photoTimer) {
-      clearInterval(photoTimer);
-      photoTimer = null;
-    }
-    photoImg.classList.remove('visible');
-    photoCaption.classList.remove('visible');
+  function clearPhotos() {
+    var grid = document.getElementById('photo-display');
+    grid.classList.remove('settled');
+    var tiles = grid.querySelectorAll('.photo-tile');
+    for (var i = 0; i < tiles.length; i++) tiles[i].classList.remove('placed');
+    setTimeout(function () { grid.innerHTML = ''; }, 600);
   }
 
   // ── Timeline helper ────────────────────────────
@@ -822,9 +884,10 @@
     at(0,      function () { show('layer-for-dad'); });
     at(4500,   function () { hide('layer-for-dad'); });
 
-    // Scene 2: Board fades in, dark (5000 – 7000)
+    // Scene 2: Board fades in (3D tilt) + accessory LED grid descends onto it
     at(5000,   function () {
       document.getElementById('board-wrap').classList.add('visible');
+      document.getElementById('accessory-overlay').classList.add('landed');
     });
 
     // Scene 3: Lights come on — wave (7000 – 11000)
@@ -899,7 +962,7 @@
     at(51000,  function () { show('layer-f5'); });   // Fraction of the cost
     at(54500,  function () { hide('layer-f5'); });
 
-    // Scene 8: Photo scene — board flips, photos cycle (55000 – 74000)
+    // Scene 8: Photo scene — board flips, photos laid out on the back (55000 – 74000)
     at(55000,  function () {
       show('layer-photo');
     });
@@ -909,12 +972,12 @@
     });
     at(60000,  function () {
       hide('layer-photo');
-      // Start cycling photos on the back
-      startPhotoMontage();
+      // Lay out all photos on the back at once, fast
+      layoutPhotos();
     });
     at(74000,  function () {
-      // Stop photos, flip back
-      stopPhotoMontage();
+      // Clear photos, flip back
+      clearPhotos();
       unflipBoard();
     });
 
@@ -928,9 +991,16 @@
     });
   }
 
-  // ── Nickname carousel ──────────────────────────
+  // ── Nickname carousel (per-name ms from JSONL) ─────────
+  // nicknames.jsonl format: {"name":"Mike Sr.","ms":4000}
+  // ms is OPTIONAL — controls how long THIS name shows before the next.
+  // Omit ms (or use a non-number) to fall back to DEFAULT_NAME_MS.
+  var DEFAULT_NAME_MS = 3500;
   var nicknameIndex = 0;
-  var nicknames = ['Mike Sr.', 'Dad'];
+  var nicknames = [
+    { name: 'Mike Sr.', ms: DEFAULT_NAME_MS },
+    { name: 'Dad',      ms: DEFAULT_NAME_MS }
+  ];
   var carouselTimer = null;
   var nameEl = document.getElementById('dedication-name');
 
@@ -944,10 +1014,15 @@
         var parsed = text.trim().split('\n')
           .filter(function (line) { return line.trim().length > 0; })
           .map(function (line) {
-            try { return JSON.parse(line).name; }
-            catch (e) { return line.trim(); }
+            try {
+              var obj = JSON.parse(line);
+              var ms = (typeof obj.ms === 'number' && obj.ms > 0) ? obj.ms : DEFAULT_NAME_MS;
+              return { name: obj.name, ms: ms };
+            } catch (e) {
+              return { name: line.trim(), ms: DEFAULT_NAME_MS };
+            }
           })
-          .filter(function (n) { return n && n.length > 0; });
+          .filter(function (n) { return n.name && n.name.length > 0; });
         if (parsed.length > 0) {
           nicknames = parsed;
         }
@@ -959,21 +1034,29 @@
       });
   }
 
+  // Show entry[k], dwell for entry[k].ms, then advance — recursive setTimeout
+  // so each name's display duration is driven by its own ms in the JSONL.
   function rotateNickname() {
-    if (nicknameIndex >= nicknames.length) {
-      nicknameIndex = 0;
-    }
-    var name = nicknames[nicknameIndex];
+    if (nicknameIndex >= nicknames.length) nicknameIndex = 0;
+    var entry = nicknames[nicknameIndex];
     nameEl.style.opacity = '0';
     setTimeout(function () {
-      nameEl.textContent = name;
+      nameEl.textContent = entry.name;
       nameEl.style.opacity = '1';
       nicknameIndex++;
+      // Schedule the next rotation after THIS name's dwell time.
+      carouselTimer = setTimeout(rotateNickname, entry.ms);
     }, 600);
   }
 
   function startNicknameCarousel() {
-    carouselTimer = setInterval(rotateNickname, 3500);
+    // First rotation after a startup beat; each subsequent rotation uses
+    // that entry's ms (so the JSONL controls the pace from the second name on).
+    carouselTimer = setTimeout(rotateNickname, DEFAULT_NAME_MS);
+  }
+
+  function stopNicknameCarousel() {
+    if (carouselTimer) { clearTimeout(carouselTimer); carouselTimer = null; }
   }
 
   // ── Start ──────────────────────────────────────
@@ -1007,7 +1090,9 @@
     ledOn: ledOn, ledOff: ledOff, allLedsOn: function(c){ledData.forEach(function(l){l.el.classList.add('on',c);l.glow.classList.add('on',c);});}, allLedsOff: allLedsOff,
     waveOn: waveOn, ledData: ledData, start: start,
     flipBoard: flipBoard, unflipBoard: unflipBoard,
-    startPhotoMontage: startPhotoMontage, stopPhotoMontage: stopPhotoMontage,
+    layoutPhotos: layoutPhotos, clearPhotos: clearPhotos,
+    landAccessory: function(){ document.getElementById('accessory-overlay').classList.add('landed'); },
+    startNicknameCarousel: startNicknameCarousel, stopNicknameCarousel: stopNicknameCarousel,
     startPPAScroll: startPPAScroll, stopPPAScroll: stopPPAScroll
   };
 })();
