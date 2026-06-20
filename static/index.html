@@ -1140,13 +1140,21 @@
         var parsed = text.trim().split('\n')
           .filter(function (line) { return line.trim().length > 0; })
           .map(function (line) {
-            try {
-              var obj = JSON.parse(line);
-              var ms = (typeof obj.ms === 'number' && obj.ms > 0) ? obj.ms : DEFAULT_NAME_MS;
-              return { name: obj.name, ms: ms };
-            } catch (e) {
-              return { name: line.trim(), ms: DEFAULT_NAME_MS };
+            // Try strict JSON first, then fall back to lenient regex parsing
+            // to handle unquoted keys (ms: 1000) and stray braces (}})
+            var obj = null;
+            try { obj = JSON.parse(line); }
+            catch (e) {
+              var nameMatch = line.match(/"name"\s*:\s*"([^"]*)"/);
+              var msMatch = line.match(/\bms\s*:\s*(\d+)/);
+              if (nameMatch) {
+                obj = { name: nameMatch[1] };
+                if (msMatch) obj.ms = parseInt(msMatch[1], 10);
+              }
             }
+            if (!obj) return { name: line.trim(), ms: DEFAULT_NAME_MS };
+            var ms = (typeof obj.ms === 'number' && obj.ms > 0) ? obj.ms : DEFAULT_NAME_MS;
+            return { name: obj.name, ms: ms };
           })
           .filter(function (n) { return n.name && n.name.length > 0; });
         if (parsed.length > 0) {
