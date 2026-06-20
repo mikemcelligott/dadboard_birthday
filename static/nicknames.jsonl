@@ -1,23 +1,22 @@
-{"name" :"Big Mike"}
-{"name": "Mike Sr."}
-{"name": "Dad"}
-{"name": "Dadmeister"}
-{"name": "Mustard Bill"}
-{"name": "Popsicle"}
-{"name": "Pops"}
-{"name": "Popeye Ugamugamug"}
-{"name": "Popadopalous"}
-{"name": "Papillon"}
-{"name": "Monkey Bars (serving Sammy + Sally The Snakes)"}
-{"name": "Johnson"}
-{"name": "Ray"}
-{"name": "Jay"}
-{"name": "Johnnie"}
-{"name": "Sonny"}
-{"name": "Junie"}
-{"name": "Ray Jay"}
-{"name": "RJ"}
-{"name": "RJ... J"}
-{"name": "RJJ Junior"}
-{"name": "(but not Johnson)"}
+{"name" :"Big Mike", ms: 2000}
+{"name" :"The Guy Quietly Holding The World Up For Everyone Around Him", ms: 1500}
+{"name": "Dad", ms: 1500}
+{"name": "Dadmeister", ms: 1500}
+{"name": "Mustard Bill", ms: 1000}
+{"name": "Popsicle", ms: 800}
+{"name": "Pops", ms: 800}
+{"name": "Popeye Ugamugamug", ms: 800}}
+{"name": "Popadopalous", ms: 800}}
+{"name": "Papillon", ms: 800}}
+{"name": "Biological Monkey Bars For Sammy + Sally The Snakes", ms: 800}}
+{"name": "Johnson", ms: 800}}
+{"name": "Ray", ms: 700}}
+{"name": "Jay", ms: 700}
+{"name": "Johnnie", ms: 500}
+{"name": "Sonny", ms: 400}
+{"name": "Junie", ms: 300}
+{"name": "Ray Jay", ms: 200}
+{"name": "RJ", ms: 200}
+{"name": "RJ... J", ms: 200}
+{"name": "RJJ Junior", ms: 200}
 {"name": "Dad"}
