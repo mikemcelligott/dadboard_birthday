@@ -536,12 +536,9 @@
   </div>
 
   <div class="layer" id="layer-move">
-    <div class="move-label">the roll-up board that sees every move</div>
+    <div class="move-label">it sees every move</div>
   </div>
 
-  <div class="layer" id="layer-f1">
-    <div class="feature serif">rolls up</div>
-  </div>
   <div class="layer" id="layer-f2">
     <div class="feature serif">works with the pieces you already own</div>
   </div>
@@ -852,6 +849,175 @@
     'discrete electronic components in the sensing surface,',
     'achieving a manufacturing cost substantially below that of',
     'existing electronic game boards.',
+    '',
+    '_______________________________________________',
+    '',
+    'DETAILED DESCRIPTION OF PREFERRED EMBODIMENTS',
+    '',
+    'Embodiment 1 — Resistive Strip Bypass Architecture',
+    '',
+    'In the first preferred embodiment, the sensing surface is',
+    'constructed using a resistive strip bypass architecture.',
+    'Two layers of conductive traces are screen-printed onto a',
+    'polyimide substrate: a row layer and a column layer, oriented',
+    'perpendicularly and separated by a thin dielectric film with',
+    'apertures at each intersection corresponding to a playing',
+    'square.',
+    '',
+    'At each aperture, a resistive element bridges the row and',
+    'column traces. The resistive element is formulated from a',
+    'carbon-loaded polymer ink with a nominal resistance of',
+    'approximately 10 kilohms in the unloaded state. When a game',
+    'piece is placed on the corresponding square, the pressure of',
+    'the piece compresses the resistive element, causing its',
+    'resistance to drop to approximately 2 kilohms or less.',
+    '',
+    'The electronics module scans the grid by sequentially',
+    'connecting each row to a voltage source through an analog',
+    'multiplexer and each column to an analog-to-digital converter',
+    'through a second multiplexer. For each of the 64 positions',
+    'on a standard chess board, the ADC reads the voltage at the',
+    'column line, which is inversely proportional to the resistance',
+    'at that intersection. A reading above a calibrated threshold',
+    'indicates an empty square; a reading below the threshold',
+    'indicates the presence of a piece.',
+    '',
+    'The scan rate is approximately 100 Hz, meaning the entire',
+    'board is sampled 100 times per second. This rate is sufficient',
+    'to detect piece placement, removal, and movement in real time',
+    'without perceptible latency to the player.',
+    '',
+    'Embodiment 2 — Fractal-Patterned Conductive Contact Layer',
+    '',
+    'In the second preferred embodiment, the sensing surface',
+    'employs a fractal-patterned conductive contact layer. A',
+    'space-filling fractal curve (specifically, a Hilbert curve',
+    'of order 4) is screen-printed in silver conductive ink on',
+    'the substrate. The fractal pattern distributes conductive',
+    'material across the entire sensing area while maintaining',
+    'electrical continuity through a single trace.',
+    '',
+    'A resistive overlay sheet is placed above the fractal',
+    'conductive layer, separated by a small air gap maintained',
+    'by micro-pillars molded into the overlay. When a piece is',
+    'placed on a square, the overlay deflects at that point,',
+    'making contact with the fractal conductor beneath. The',
+    'resulting resistance change is measured at the endpoints',
+    'of the fractal trace using a voltage divider circuit.',
+    '',
+    'The advantage of the fractal approach is that a single',
+    'continuous conductive trace can serve the entire board,',
+    'reducing manufacturing complexity and material cost. The',
+    'trade-off is that position resolution requires tomographic',
+    'reconstruction from the boundary measurements, which',
+    'demands more computational resources from the electronics',
+    'module.',
+    '',
+    'Embodiment 3 — Electrical Impedance Tomography',
+    '',
+    'In the third preferred embodiment, electrical impedance',
+    'tomography (EIT) is applied to the sensing surface. Sixteen',
+    'electrodes are evenly spaced around the perimeter of the',
+    'sensing area. The electronics module applies an AC excitation',
+    'signal between an adjacent pair of electrodes and measures',
+    'the resulting voltage at all other electrode pairs.',
+    '',
+    'This process is repeated for all 16 adjacent electrode pairs,',
+    'producing 16 × 14 = 224 independent measurements per scan',
+    'cycle. A linearized inverse problem is solved using a',
+    'pre-computed Jacobian matrix to reconstruct the impedance',
+    'distribution across the sensing surface.',
+    '',
+    'The presence of a game piece on a square creates a localized',
+    'impedance perturbation that appears as a peak in the',
+    'reconstructed image. The position of the peak identifies the',
+    'occupied square. This approach requires no conductive traces',
+    'on the sensing surface itself — only perimeter electrodes —',
+    'making it the lowest-cost manufacturing option.',
+    '',
+    'Embodiment 4 — Hybrid Weight-Based Identity Inference',
+    '',
+    'In a fourth embodiment, the sensing elements are configured',
+    'to measure not only the presence of a piece but also its',
+    'weight. Standard chess pieces have characteristic weights',
+    'that differ by piece type: a pawn weighs approximately',
+    '15-20 grams, a knight or bishop 25-35 grams, a rook 40-55',
+    'grams, and a queen 50-70 grams.',
+    '',
+    'By calibrating each sensing position with a known weight',
+    'reference, the electronics module can infer the type of',
+    'piece on each square from the measured resistance change,',
+    'which is proportional to the applied force. This enables',
+    'the board to identify pieces without RFID, magnets, or',
+    'any modification to the pieces themselves.',
+    '',
+    'The inference algorithm uses a simple nearest-neighbor',
+    'classifier trained on the six standard piece weights. The',
+    'accuracy of weight-based identification is approximately',
+    '90 percent for standard tournament pieces and can be',
+    'improved through per-piece calibration by the user.',
+    '',
+    '_______________________________________________',
+    '',
+    'ADDITIONAL CLAIMS',
+    '',
+    '13. The flexible electronic game board of claim 1, wherein',
+    'said sensing elements are configured to measure a force',
+    'applied by a game piece, thereby enabling weight-based',
+    'piece type identification.',
+    '',
+    '14. The flexible electronic game board of claim 1, wherein',
+    'said sensing layer comprises a fractal-patterned conductive',
+    'trace arranged in a Hilbert curve geometry.',
+    '',
+    '15. The flexible electronic game board of claim 1, wherein',
+    'said sensing layer comprises perimeter electrodes configured',
+    'for electrical impedance tomography.',
+    '',
+    '16. The flexible electronic game board of claim 10, wherein',
+    'said method further comprises the step of identifying a',
+    'piece type by comparing a measured force value to a',
+    'previously calibrated weight signature for each piece type.',
+    '',
+    '17. The flexible electronic game board of claim 1, further',
+    'comprising a paired remote board, wherein game state',
+    'changes detected on said flexible electronic game board',
+    'are transmitted to said paired remote board, and wherein',
+    'said paired remote board displays corresponding LED',
+    'indications to mirror said game state.',
+    '',
+    '18. The flexible electronic game board of claim 1, wherein',
+    'said electronics module is configured to detect illegal',
+    'moves and provide visual indication thereof through said',
+    'sensing layer.',
+    '',
+    '_______________________________________________',
+    '',
+    'COMPUTER PROGRAM PRODUCT',
+    '',
+    'In a further aspect, the invention comprises a computer',
+    'program product stored on a non-transitory computer-readable',
+    'medium, comprising instructions that, when executed by a',
+    'microcontroller of the electronics module, cause the',
+    'microcontroller to:',
+    '',
+    '(a) sequentially scan the sensing elements of the flexible',
+    'electronic game board to obtain resistance values;',
+    '(b) compare each resistance value to a calibrated baseline',
+    'to determine piece presence at each playing square;',
+    '(c) construct a game state representation from the detected',
+    'piece positions;',
+    '(d) broadcast the game state representation wirelessly to',
+    'at least one companion device;',
+    '(e) receive move commands from the companion device and',
+    'display corresponding LED indications on the board; and',
+    '(f) maintain a game history log comprising a sequence of',
+    'detected board states indexed by timestamp.',
+    '',
+    'The computer program product further comprises instructions',
+    'for generating a PGN (Portable Game Notation) file from the',
+    'game history log, enabling the user to export and review',
+    'completed games on standard chess software platforms.',
     '',
     '_______________________________________________',
     '',
@@ -1235,59 +1401,56 @@
       ledOff(4, 4);
     });
 
-    // Scene 6: Features — one per beat (34500 – 49000)
-    at(34500,  function () { show('layer-f1'); });   // rolls up
-    at(38000,  function () { hide('layer-f1'); });
+    // Scene 6: Features — one per beat (34500 – 44500)
+    at(34500,  function () { show('layer-f2'); });   // works with your pieces
+    at(38000,  function () { hide('layer-f2'); });
 
-    at(38500,  function () { show('layer-f2'); });   // works with your pieces
-    at(42000,  function () { hide('layer-f2'); });
+    at(38500,  function () { show('layer-f3'); });   // teaches the game
+    at(42000,  function () { hide('layer-f3'); });
 
-    at(42500,  function () { show('layer-f3'); });   // teaches the game
-    at(46000,  function () { hide('layer-f3'); });
+    at(42500,  function () { show('layer-f4'); });   // supports remote play
+    at(46000,  function () { hide('layer-f4'); });
 
-    at(46500,  function () { show('layer-f4'); });   // supports remote play
-    at(50000,  function () { hide('layer-f4'); });
-
-    // Scene 7: Photo scene — board flips, photos laid out on the back (50500 – 69500)
-    at(50500,  function () {
-      show('layer-photo');  // "with a customizable underside"
+    // Scene 7: Photo scene — board flips, photos laid out on the back (46500 – 65500)
+    at(46500,  function () {
+      show('layer-photo');  // "and with a customizable underside"
     });
-    at(52500,  function () {
+    at(48500,  function () {
       // Flip the board to reveal the underside
       flipBoard();
     });
-    at(55500,  function () {
+    at(51500,  function () {
       hide('layer-photo');
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
-    at(60500,  function () {
-      show('layer-photo-2');  // "it remembers more than just games"
+    at(56500,  function () {
+      show('layer-photo-2');  // "can remember more than just games"
     });
-    at(66500,  function () {
+    at(62500,  function () {
       hide('layer-photo-2');
     });
-    at(69500,  function () {
+    at(65500,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 8: Dedication build-up (70500 – 89500)
-    at(70500,  function () {
+    // Scene 8: Dedication build-up (66500 – 85500)
+    at(66500,  function () {
       show('layer-intro-dedication');  // "Dedicated to the dad who made it all possible..,"
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(76500,  function () {
+    at(72500,  function () {
       // Beat — reveal the continuation
       document.getElementById('dedication-part2').style.opacity = '1';
     });
-    at(84500,  function () {
+    at(80500,  function () {
       // Transition to final "dedicated to" reveal
       hide('layer-intro-dedication');
       show('layer-dedication');
     });
-    at(89500,  function () {
+    at(85500,  function () {
       startNicknameCarousel();
     });
   }
