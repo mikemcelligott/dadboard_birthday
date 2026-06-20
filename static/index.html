@@ -1533,9 +1533,13 @@
   }
 
   function startNicknameCarousel() {
-    // First rotation after a startup beat; each subsequent rotation uses
-    // that entry's ms (so the JSONL controls the pace from the second name on).
-    carouselTimer = setTimeout(rotateNickname, DEFAULT_NAME_MS);
+    // Show the first nickname immediately, then start rotating after 1.5s
+    if (nicknames.length > 0) {
+      nameEl.textContent = nicknames[0].name;
+      nameEl.style.opacity = '1';
+      nicknameIndex = 1;
+    }
+    carouselTimer = setTimeout(rotateNickname, 1500);
   }
 
   function stopNicknameCarousel() {
