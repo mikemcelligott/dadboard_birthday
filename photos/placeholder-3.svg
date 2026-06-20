@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#4a5a6a"/>
+  <rect x="120" y="80" width="160" height="140" fill="#6a7a8a" opacity="0.6" rx="4"/>
+  <line x1="120" y1="150" x2="280" y2="150" stroke="#8a9aaa" opacity="0.4" stroke-width="2"/>
+  <line x1="200" y1="80" x2="200" y2="220" stroke="#8a9aaa" opacity="0.4" stroke-width="2"/>
+  <text x="200" y="240" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#b0c0d0" opacity="0.5">PHOTO 3</text>
+</svg>

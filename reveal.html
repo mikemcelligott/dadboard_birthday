@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>dadboard</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --board-light: #d4a55a;
+    --board-dark: #8b5e34;
+    --led-amber: #ff8c00;
+    --led-green: #00e050;
+    --led-off: rgba(80,80,80,0.35);
+    --ink: #e8e4d8;
+    --muted: #888;
+    --back-leather: #3a2e22;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1600px;
+  }
+
+  /* ── Board (3D flip container) ────────────────── */
+
+  #board-wrap {
+    position: relative;
+    width: min(60vmin, 600px);
+    height: min(60vmin, 600px);
+    opacity: 0;
+    transition: opacity 2s ease, transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+    transform-style: preserve-3d;
+  }
+  #board-wrap.visible { opacity: 1; }
+  #board-wrap.flipped { transform: rotateY(180deg); }
+
+  #board-front, #board-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  #board-back {
+    transform: rotateY(180deg);
+    background: var(--back-leather);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Leather texture hint on the back */
+  #board-back::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(80,60,40,0.4) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(50,35,20,0.4) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  #board-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ── Photo on board back ──────────────────────── */
+
+  #photo-display {
+    position: relative;
+    width: 72%;
+    height: 72%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  #photo-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 1.2s ease, filter 2s ease;
+    filter: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  #photo-img.visible { opacity: 1; }
+  #photo-img.bw { filter: grayscale(1) contrast(1.05) brightness(0.95); }
+
+  #photo-caption {
+    position: absolute;
+    bottom: -2.5em;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Georgia', serif;
+    font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 1s ease;
+    white-space: nowrap;
+  }
+  #photo-caption.visible { opacity: 0.7; }
+
+  /* ── PPA scroll text (behind date) ────────────── */
+
+  #ppa-scroll-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+  }
+  #ppa-scroll-layer.visible { opacity: 1; }
+
+  #ppa-scroll {
+    position: absolute;
+    bottom: -100%;
+    width: 90%;
+    max-width: 640px;
+    font-family: 'Courier New', 'Courier', monospace;
+    font-size: clamp(0.6rem, 1.3vw, 0.8rem);
+    line-height: 2.2;
+    color: #2a2a2a;
+    text-align: center;
+    white-space: pre-line;
+    will-change: transform;
+  }
+
+  /* ── Text layers ──────────────────────────────── */
+
+  .layer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    z-index: 10;
+  }
+  .layer.visible { opacity: 1; }
+
+  .serif { font-family: 'Georgia', 'Times New Roman', serif; }
+  .sans  { font-family: 'Helvetica Neue', 'Arial', sans-serif; }
+
+  .for-dad {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+
+  .birthday-line {
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 1.5rem;
+  }
+
+  .title {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--muted);
+    margin-top: 1.2rem;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    letter-spacing: 0.03em;
+  }
+
+  .date-year {
+    font-size: clamp(3rem, 7vw, 5rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    position: relative;
+    z-index: 11;
+  }
+  .date-on {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 0.8rem;
+    position: relative;
+    z-index: 11;
+  }
+  .date-day {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 400;
+    color: var(--led-green);
+    margin-top: 0.8rem;
+    letter-spacing: 0.04em;
+    position: relative;
+    z-index: 11;
+    text-shadow: 0 0 30px rgba(0, 224, 80, 0.3);
+  }
+
+  .move-label {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .move-sub {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    color: var(--muted);
+    margin-top: 0.6rem;
+    letter-spacing: 0.03em;
+  }
+
+  .feature {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+  .feature-sub {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-size: clamp(0.9rem, 2.2vw, 1.2rem);
+    color: var(--muted);
+    margin-top: 1rem;
+    letter-spacing: 0.02em;
+    text-decoration: line-through;
+    text-decoration-color: var(--led-amber);
+  }
+
+  .photo-line {
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+
+  .dedication-top {
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    color: var(--muted);
+    font-style: italic;
+  }
+  .dedication-name {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 400;
+    color: var(--ink);
+    margin-top: 1rem;
+    min-height: 1.2em;
+    letter-spacing: 0.02em;
+    transition: opacity 0.6s ease;
+  }
+  .dedication-bottom {
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 1rem;
+  }
+
+  /* Start prompt */
+  #start-prompt {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+  }
+  #start-prompt.hidden { opacity: 0; pointer-events: none; }
+  #start-prompt .hint {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+
+  /* LEDs */
+  .led {
+    transition: opacity 0.3s ease, fill 0.3s ease;
+  }
+  .led.on {
+    animation: led-pulse 1.5s ease-in-out infinite;
+  }
+  .led.on.amber { fill: var(--led-amber); }
+  .led.on.green { fill: var(--led-green); }
+
+  .led-glow {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    fill: none;
+    stroke-width: 2;
+  }
+  .led-glow.on {
+    opacity: 0.3;
+    animation: glow-pulse 1.5s ease-in-out infinite;
+  }
+  .led-glow.on.amber { stroke: var(--led-amber); }
+  .led-glow.on.green { stroke: var(--led-green); }
+
+  @keyframes led-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { r: 10px; opacity: 0.3; }
+    50% { r: 18px; opacity: 0.1; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .led.on, .led-glow.on { animation: none; }
+    .led.on { opacity: 0.85; }
+    .led-glow.on { opacity: 0.2; }
+    #board-wrap { transition: opacity 1s ease; }
+    #ppa-scroll { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- ── Chess board with 3D flip ──────────────── -->
+  <div id="board-wrap">
+    <div id="board-front">
+      <svg id="board-svg" viewBox="0 0 700 700" preserveAspectRatio="xMidYMid meet">
+        <g id="squares"></g>
+        <g id="grid" stroke="rgba(200,200,210,0.35)" stroke-width="2.5" fill="none"></g>
+        <g id="leds"></g>
+      </svg>
+    </div>
+    <div id="board-back">
+      <div id="photo-display">
+        <img id="photo-img" alt="" />
+        <div id="photo-caption"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PPA scroll (behind date) ───────────────── -->
+  <div id="ppa-scroll-layer">
+    <div id="ppa-scroll"></div>
+  </div>
+
+  <!-- ── Text layers ──────────────────────────── -->
+  <div class="layer" id="layer-for-dad">
+    <div class="for-dad serif">For Dad.</div>
+    <div class="birthday-line serif">On his 80th birthday.</div>
+  </div>
+
+  <div class="layer" id="layer-title">
+    <div class="title serif">dadboard</div>
+    <div class="subtitle">A chess board that knows what just happened.</div>
+  </div>
+
+  <div class="layer" id="layer-date">
+    <div class="date-year serif" id="date-year-el">2026</div>
+    <div class="date-on serif" id="date-on-el" style="opacity:0;transition:opacity 1s ease">on</div>
+    <div class="date-day serif" id="date-day-el" style="opacity:0;transition:opacity 1s ease">June 13</div>
+  </div>
+
+  <div class="layer" id="layer-move">
+    <div class="move-label">It sees every move</div>
+    <div class="move-sub">e2 &rarr; e4 &nbsp; &middot; &nbsp; the game begins</div>
+  </div>
+
+  <div class="layer" id="layer-capture">
+    <div class="move-label">It knows when a piece is taken</div>
+    <div class="move-sub">no camera, no RFID &nbsp; &middot; &nbsp; it just knows</div>
+  </div>
+
+  <div class="layer" id="layer-f1">
+    <div class="feature serif">It rolls up.</div>
+  </div>
+  <div class="layer" id="layer-f2">
+    <div class="feature serif">Works with the pieces you already own.</div>
+  </div>
+  <div class="layer" id="layer-f3">
+    <div class="feature serif">Play across the room &mdash; or across the country.</div>
+  </div>
+  <div class="layer" id="layer-f4">
+    <div class="feature serif">It teaches the game.</div>
+  </div>
+  <div class="layer" id="layer-f5">
+    <div class="feature serif">A fraction of the cost.</div>
+    <div class="feature-sub">$300 &ndash; $500</div>
+  </div>
+
+  <div class="layer" id="layer-photo">
+    <div class="photo-line serif">The underside is yours.</div>
+  </div>
+
+  <div class="layer" id="layer-dedication">
+    <div class="dedication-top serif">Dedicated to</div>
+    <div class="dedication-name serif" id="dedication-name">Mike Sr.</div>
+    <div class="dedication-bottom serif">for his 80th birthday.</div>
+  </div>
+
+</div>
+
+<!-- Start prompt -->
+<div id="start-prompt">
+  <div class="hint">Press space or click to begin</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Config ──────────────────────────────────────
+  var SQ = 87.5;
+  var LED_R = 5;
+  var LED_OFFSET = 10;
+  var NICKNAMES_URL = 'nicknames.jsonl';
+  var PHOTOS_URL = 'photos.jsonl';
+
+  // ── PPA filing text (from the actual filing) ───
+  var PPA_TEXT = [
+    'PROVISIONAL APPLICATION FOR PATENT',
+    'under 35 U.S.C. \u00a7 111(b)',
+    '',
+    'TITLE OF INVENTION:',
+    'Flexible Electronic Game Board with Resistive Sensing,',
+    'Piece Detection and Identity Inference, and Wireless',
+    'Game State Broadcasting',
+    '',
+    'INVENTOR:',
+    'Michael James McElligott Jr.',
+    '',
+    'CORRESPONDENCE ADDRESS:',
+    '160 Venetian Way #112, Merritt Island, FL 32953',
+    '',
+    'FILING DATE: June 13, 2026',
+    'ENTITY STATUS: Micro Entity',
+    '',
+    'FIELD OF THE INVENTION',
+    '',
+    'The present invention relates to electronic game boards',
+    'and to flexible printed sensors. More specifically, the',
+    'invention relates to a family of sensing architectures',
+    'for low-cost flexible and rollable game boards that detect',
+    'game piece presence, position, and optionally identity',
+    'across a grid of playing squares, and broadcast game state',
+    'wirelessly to companion devices and/or paired remote boards.',
+    '',
+    'The invention further relates to printed displacement',
+    'sensors, resistive strip bypass sensing elements, fractal-',
+    'patterned conductive contact layers, trip-wire amplification',
+    'structures, electrical impedance tomography applied to',
+    'planar game surfaces, analog multiplexer-based scanning',
+    'architectures, embedded or detachable edge electronics',
+    'modules, and related firmware methods for game state',
+    'inference, calibration, and piece identification.',
+    '',
+    'BACKGROUND OF THE INVENTION',
+    '',
+    'Board games such as chess, Go, shogi, checkers, and xiangqi',
+    'have been played with physical pieces on physical boards for',
+    'centuries. A variety of systems have been proposed or',
+    'commercialized to add electronic sensing capabilities to',
+    'board games \u2014 enabling game recording, analysis,',
+    'correspondence play, and integration with digital platforms.',
+    '',
+    'Existing electronic chess boards use embedded coil arrays,',
+    'Hall effect sensors, reed switches, or RFID readers to detect',
+    'and identify pieces. These systems typically require pieces',
+    'incorporating permanent magnets or RFID transponder chips,',
+    'raising per-piece manufacturing cost and tying the board to a',
+    'proprietary piece set. These boards are constructed with rigid',
+    'substrates, resulting in retail prices in the hundreds of',
+    'dollars and precluding portable rolled or folded storage.',
+    '',
+    'NEED IN THE ART',
+    '',
+    'There is a need for a low-cost, flexible, and rollable',
+    'electronic game board that operates with standard unmodified',
+    'game pieces, provides binary piece detection and, in preferred',
+    'embodiments, weight-based or signature-based piece identity',
+    'inference, requires no per-square discrete electronic components',
+    'in its sensing surface, and supports wireless game state',
+    'broadcasting to companion mobile applications and remote boards.',
+    '',
+    'SUMMARY OF THE INVENTION',
+    '',
+    'The present invention comprises a family of related sensing',
+    'architectures for flexible electronic game boards, sharing a set',
+    'of common design principles and a common electronics platform.',
+    'The architectures range in manufacturing complexity and',
+    'computational requirement, offering a product design spectrum',
+    'from low-cost entry-level configurations to feature-rich',
+    'premium implementations.',
+    '',
+    'The entire assembly is constructed from flexible materials,',
+    'enabling the board to be rolled for storage and transport.',
+    '',
+    '_______________________________________________',
+    '',
+    '         /S/ Michael McElligott',
+    '',
+    '            Pro se applicant',
+    '',
+    '            June 13, 2026',
+    '',
+    '_______________________________________________'
+  ].join('\n');
+
+  // ── Build the board ────────────────────────────
+  var squaresG = document.getElementById('squares');
+  var gridG = document.getElementById('grid');
+  var ledsG = document.getElementById('leds');
+
+  var ledData = [];
+
+  function buildBoard() {
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', c * SQ);
+        rect.setAttribute('y', r * SQ);
+        rect.setAttribute('width', SQ);
+        rect.setAttribute('height', SQ);
+        rect.setAttribute('fill', (r + c) % 2 === 0 ? '#d4a55a' : '#8b5e34');
+        squaresG.appendChild(rect);
+      }
+    }
+
+    var border = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    border.setAttribute('x', -4);
+    border.setAttribute('y', -4);
+    border.setAttribute('width', 8 * SQ + 8);
+    border.setAttribute('height', 8 * SQ + 8);
+    border.setAttribute('rx', 3);
+    gridG.appendChild(border);
+
+    for (var i = 1; i < 8; i++) {
+      var v = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      v.setAttribute('x1', i * SQ); v.setAttribute('y1', -4);
+      v.setAttribute('x2', i * SQ); v.setAttribute('y2', 8 * SQ + 4);
+      gridG.appendChild(v);
+
+      var h = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      h.setAttribute('x1', -4); h.setAttribute('y1', i * SQ);
+      h.setAttribute('x2', 8 * SQ + 4); h.setAttribute('y2', i * SQ);
+      gridG.appendChild(h);
+    }
+
+    for (var r2 = 0; r2 < 8; r2++) {
+      for (var c2 = 0; c2 < 8; c2++) {
+        var cx = c2 * SQ + LED_OFFSET;
+        var cy = r2 * SQ + LED_OFFSET;
+
+        var glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('cx', cx);
+        glow.setAttribute('cy', cy);
+        glow.setAttribute('r', 10);
+        glow.setAttribute('class', 'led-glow');
+        ledsG.appendChild(glow);
+
+        var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', cx);
+        dot.setAttribute('cy', cy);
+        dot.setAttribute('r', LED_R);
+        dot.setAttribute('class', 'led');
+        dot.setAttribute('fill', 'var(--led-off)');
+        ledsG.appendChild(dot);
+
+        ledData.push({ row: r2, col: c2, cx: cx, cy: cy, el: dot, glow: glow });
+      }
+    }
+  }
+
+  // ── LED control ────────────────────────────────
+  function ledOn(row, col, color) {
+    var led = ledData[row * 8 + col];
+    if (!led) return;
+    led.el.classList.add('on', color);
+    led.glow.classList.add('on', color);
+  }
+
+  function ledOff(row, col) {
+    var led = ledData[row * 8 + col];
+    if (!led) return;
+    led.el.classList.remove('on', 'amber', 'green');
+    led.glow.classList.remove('on', 'amber', 'green');
+  }
+
+  function allLedsOff() {
+    ledData.forEach(function (led) {
+      led.el.classList.remove('on', 'amber', 'green');
+      led.glow.classList.remove('on', 'amber', 'green');
+    });
+  }
+
+  function waveOn(color, perLedMs, callback) {
+    var i = 0;
+    function step() {
+      if (i >= ledData.length) {
+        if (callback) callback();
+        return;
+      }
+      var led = ledData[i];
+      led.el.classList.add('on', color);
+      led.glow.classList.add('on', color);
+      i++;
+      setTimeout(step, perLedMs);
+    }
+    step();
+  }
+
+  // ── Layer control ──────────────────────────────
+  function show(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('visible');
+  }
+  function hide(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+  }
+
+  // ── Board flip ─────────────────────────────────
+  function flipBoard() {
+    document.getElementById('board-wrap').classList.add('flipped');
+  }
+  function unflipBoard() {
+    document.getElementById('board-wrap').classList.remove('flipped');
+  }
+
+  // ── PPA scroll ─────────────────────────────────
+  var ppaLayer = document.getElementById('ppa-scroll-layer');
+  var ppaScrollEl = document.getElementById('ppa-scroll');
+  var ppaAnimFrame = null;
+  var ppaStart = 0;
+  var ppaDuration = 8000; // ms to scroll through
+
+  function initPPAScroll() {
+    ppaScrollEl.textContent = PPA_TEXT;
+  }
+
+  function startPPAScroll() {
+    ppaLayer.classList.add('visible');
+    ppaScrollEl.style.transform = 'translateY(0)';
+    ppaStart = performance.now();
+
+    function animate() {
+      var elapsed = performance.now() - ppaStart;
+      var progress = Math.min(elapsed / ppaDuration, 1);
+      // Scroll from 0 to -100% of the text height (moves upward)
+      var textHeight = ppaScrollEl.offsetHeight;
+      var viewportHeight = window.innerHeight;
+      // Start: text bottom at viewport bottom; end: text top above viewport top
+      var totalTravel = textHeight + viewportHeight;
+      var translateY = -(totalTravel * progress);
+      ppaScrollEl.style.transform = 'translateY(' + translateY + 'px)';
+      if (progress < 1) {
+        ppaAnimFrame = requestAnimationFrame(animate);
+      }
+    }
+    ppaAnimFrame = requestAnimationFrame(animate);
+  }
+
+  function stopPPAScroll() {
+    ppaLayer.classList.remove('visible');
+    if (ppaAnimFrame) {
+      cancelAnimationFrame(ppaAnimFrame);
+      ppaAnimFrame = null;
+    }
+  }
+
+  // ── Photo montage ──────────────────────────────
+  var photos = [];
+  var photoIndex = 0;
+  var photoImg = document.getElementById('photo-img');
+  var photoCaption = document.getElementById('photo-caption');
+  var photoTimer = null;
+
+  function loadPhotos(callback) {
+    fetch(PHOTOS_URL, { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        var parsed = text.trim().split('\n')
+          .filter(function (line) { return line.trim().length > 0; })
+          .map(function (line) {
+            try { return JSON.parse(line); }
+            catch (e) { return { file: line.trim() }; }
+          })
+          .filter(function (p) { return p.file; });
+        photos = parsed;
+        if (callback) callback();
+      })
+      .catch(function (err) {
+        console.warn('Could not load photos.jsonl:', err);
+        if (callback) callback();
+      });
+  }
+
+  function showNextPhoto() {
+    if (photos.length === 0) return;
+    if (photoIndex >= photos.length) photoIndex = 0;
+
+    var p = photos[photoIndex];
+
+    // Fade out current
+    photoImg.classList.remove('visible');
+    photoCaption.classList.remove('visible');
+
+    setTimeout(function () {
+      // Reset to color
+      photoImg.classList.remove('bw');
+      photoImg.src = p.file;
+
+      photoImg.onload = function () {
+        // Fade in in color
+        photoImg.classList.add('visible');
+
+        // Show caption if present
+        if (p.caption) {
+          photoCaption.textContent = p.caption;
+          photoCaption.classList.add('visible');
+        }
+
+        // After a beat, desaturate to B&W — "settling into the material"
+        setTimeout(function () {
+          photoImg.classList.add('bw');
+        }, 1800);
+      };
+      photoImg.onerror = function () {
+        // Skip broken images
+        photoIndex++;
+        if (photoIndex < photos.length) showNextPhoto();
+      };
+
+      photoIndex++;
+    }, 1000);
+  }
+
+  function startPhotoMontage() {
+    photoIndex = 0;
+    showNextPhoto();
+    photoTimer = setInterval(showNextPhoto, 5000);
+  }
+
+  function stopPhotoMontage() {
+    if (photoTimer) {
+      clearInterval(photoTimer);
+      photoTimer = null;
+    }
+    photoImg.classList.remove('visible');
+    photoCaption.classList.remove('visible');
+  }
+
+  // ── Timeline helper ────────────────────────────
+  var T = [];
+  var timelineStart = 0;
+
+  function at(ms, fn) {
+    T.push({ time: ms, fn: fn });
+  }
+
+  function runTimeline() {
+    timelineStart = performance.now();
+    T.sort(function (a, b) { return a.time - b.time; });
+    var idx = 0;
+    function tick() {
+      var now = performance.now() - timelineStart;
+      while (idx < T.length && T[idx].time <= now) {
+        T[idx].fn();
+        idx++;
+      }
+      if (idx < T.length) {
+        requestAnimationFrame(tick);
+      }
+    }
+    tick();
+  }
+
+  // ── Build the timeline (all times in ms) ───────
+  function buildTimeline() {
+    // Scene 1: Black — "For Dad." (0 – 5000)
+    at(0,      function () { show('layer-for-dad'); });
+    at(4500,   function () { hide('layer-for-dad'); });
+
+    // Scene 2: Board fades in, dark (5000 – 7000)
+    at(5000,   function () {
+      document.getElementById('board-wrap').classList.add('visible');
+    });
+
+    // Scene 3: Lights come on — wave (7000 – 11000)
+    at(7000,   function () {
+      waveOn('green', 40);
+    });
+    at(10500,  function () {
+      allLedsOff();
+    });
+
+    // Scene 4: Title (11000 – 16000)
+    at(11500,  function () { show('layer-title'); });
+    at(15500,  function () { hide('layer-title'); });
+
+    // Scene 5: Date reveal with PPA scroll behind (16000 – 24000)
+    at(16000,  function () {
+      show('layer-date');
+      startPPAScroll();
+    });
+    at(18500,  function () {
+      document.getElementById('date-on-el').style.opacity = '1';
+    });
+    at(20000,  function () {
+      document.getElementById('date-day-el').style.opacity = '1';
+    });
+    at(23500,  function () {
+      hide('layer-date');
+      stopPPAScroll();
+    });
+
+    // Scene 6: The move — e2 → e4 (24000 – 30000)
+    at(24000,  function () { show('layer-move'); });
+    at(24500,  function () {
+      ledOn(6, 4, 'amber');  // e2
+    });
+    at(25500,  function () {
+      ledOn(4, 4, 'green');  // e4
+    });
+    at(29500,  function () {
+      hide('layer-move');
+      ledOff(6, 4);
+      ledOff(4, 4);
+    });
+
+    // Scene 6b: Capture sequence (30000 – 34500)
+    at(30000,  function () { show('layer-capture'); });
+    at(30500,  function () {
+      ledOn(4, 4, 'amber');  // e4 — from
+    });
+    at(31500,  function () {
+      ledOn(3, 3, 'green');  // d5 — to (capture)
+    });
+    at(34000,  function () {
+      hide('layer-capture');
+      ledOff(4, 4);
+      ledOff(3, 3);
+    });
+
+    // Scene 7: Features — one per beat (35000 – 53000)
+    at(35000,  function () { show('layer-f1'); });   // Rolls up
+    at(38500,  function () { hide('layer-f1'); });
+
+    at(39000,  function () { show('layer-f2'); });   // Works with your pieces
+    at(42500,  function () { hide('layer-f2'); });
+
+    at(43000,  function () { show('layer-f3'); });   // Remote play
+    at(46500,  function () { hide('layer-f3'); });
+
+    at(47000,  function () { show('layer-f4'); });   // Teaches the game
+    at(50500,  function () { hide('layer-f4'); });
+
+    at(51000,  function () { show('layer-f5'); });   // Fraction of the cost
+    at(54500,  function () { hide('layer-f5'); });
+
+    // Scene 8: Photo scene — board flips, photos cycle (55000 – 74000)
+    at(55000,  function () {
+      show('layer-photo');
+    });
+    at(57000,  function () {
+      // Flip the board to reveal the underside
+      flipBoard();
+    });
+    at(60000,  function () {
+      hide('layer-photo');
+      // Start cycling photos on the back
+      startPhotoMontage();
+    });
+    at(74000,  function () {
+      // Stop photos, flip back
+      stopPhotoMontage();
+      unflipBoard();
+    });
+
+    // Scene 9: Dedication (77000 – 87000)
+    at(77000,  function () {
+      show('layer-dedication');
+      document.getElementById('board-wrap').style.opacity = '0.3';
+    });
+    at(87000,  function () {
+      startNicknameCarousel();
+    });
+  }
+
+  // ── Nickname carousel ──────────────────────────
+  var nicknameIndex = 0;
+  var nicknames = ['Mike Sr.', 'Dad'];
+  var carouselTimer = null;
+  var nameEl = document.getElementById('dedication-name');
+
+  function loadNicknames(callback) {
+    fetch(NICKNAMES_URL, { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        var parsed = text.trim().split('\n')
+          .filter(function (line) { return line.trim().length > 0; })
+          .map(function (line) {
+            try { return JSON.parse(line).name; }
+            catch (e) { return line.trim(); }
+          })
+          .filter(function (n) { return n && n.length > 0; });
+        if (parsed.length > 0) {
+          nicknames = parsed;
+        }
+        if (callback) callback();
+      })
+      .catch(function (err) {
+        console.warn('Could not load nicknames.jsonl, using fallback:', err);
+        if (callback) callback();
+      });
+  }
+
+  function rotateNickname() {
+    if (nicknameIndex >= nicknames.length) {
+      nicknameIndex = 0;
+    }
+    var name = nicknames[nicknameIndex];
+    nameEl.style.opacity = '0';
+    setTimeout(function () {
+      nameEl.textContent = name;
+      nameEl.style.opacity = '1';
+      nicknameIndex++;
+    }, 600);
+  }
+
+  function startNicknameCarousel() {
+    carouselTimer = setInterval(rotateNickname, 3500);
+  }
+
+  // ── Start ──────────────────────────────────────
+  var started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    document.getElementById('start-prompt').classList.add('hidden');
+    initPPAScroll();
+    loadNicknames(function () {
+      loadPhotos(function () {
+        buildTimeline();
+        runTimeline();
+      });
+    });
+  }
+
+  // Init
+  buildBoard();
+
+  document.getElementById('start-prompt').addEventListener('click', start);
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault();
+      start();
+    }
+  });
+
+  // Expose for debugging
+  window._dadboard = {
+    ledOn: ledOn, ledOff: ledOff, allLedsOn: function(c){ledData.forEach(function(l){l.el.classList.add('on',c);l.glow.classList.add('on',c);});}, allLedsOff: allLedsOff,
+    waveOn: waveOn, ledData: ledData, start: start,
+    flipBoard: flipBoard, unflipBoard: unflipBoard,
+    startPhotoMontage: startPhotoMontage, stopPhotoMontage: stopPhotoMontage,
+    startPPAScroll: startPPAScroll, stopPPAScroll: stopPPAScroll
+  };
+})();
+</script>
+</body>
+</html>
