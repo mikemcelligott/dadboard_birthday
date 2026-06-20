@@ -90,6 +90,26 @@
     border-radius: 6px;
     pointer-events: none;
   }
+  /* ── Milky white grid overlay (overlay=grid) ──── */
+  /* Replaces the dark accessory slab with a semi-transparent milky grid
+     that has holes for each square. LED colors are slightly muted,
+     as if shining through frosted material. */
+  body.overlay-grid #accessory-frame { display: none; }
+  body.overlay-grid .led.on {
+    animation: led-pulse-subtle 1.5s ease-in-out infinite;
+  }
+  body.overlay-grid .led-glow.on {
+    animation: glow-pulse-subtle 1.5s ease-in-out infinite;
+  }
+  @keyframes led-pulse-subtle {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.68; }
+  }
+  @keyframes glow-pulse-subtle {
+    0%, 100% { r: 9px; opacity: 0.2; }
+    50% { r: 15px; opacity: 0.08; }
+  }
+
   /* LEDs live in their own SVG on the front face of the slab */
   #leds-svg {
     position: relative;
@@ -390,6 +410,15 @@
     margin-top: 1rem;
   }
 
+  .dedication-intro {
+    font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    max-width: 75vw;
+  }
+
   /* Start prompt */
   #start-prompt {
     position: fixed;
@@ -542,6 +571,10 @@
     <div class="photo-line serif">The underside is yours.</div>
   </div>
 
+  <div class="layer" id="layer-intro-dedication">
+    <div class="dedication-intro serif">Introducing the dadboard, dedicated to the dad who made it all possible.</div>
+  </div>
+
   <div class="layer" id="layer-dedication">
     <div class="dedication-top serif">Dedicated to</div>
     <div class="dedication-name serif" id="dedication-name">Mike Sr.</div>
@@ -565,6 +598,10 @@
   var LED_OFFSET = 10;
   var NICKNAMES_URL = 'nicknames.jsonl';
   var PHOTOS_URL = 'photos.jsonl';
+
+  // ── Overlay mode (?overlay=grid for milky white grid) ──
+  var overlayMode = new URLSearchParams(window.location.search).get('overlay') || '';
+  if (overlayMode === 'grid') document.body.classList.add('overlay-grid');
 
   // ── PPA filing text (from the actual filing) ───
   var PPA_TEXT = [
@@ -718,6 +755,44 @@
 
         ledData.push({ row: r2, col: c2, cx: cx, cy: cy, el: dot, glow: glow });
       }
+    }
+
+    // ── Milky white grid (only in overlay=grid mode) ──
+    // A semi-transparent milky layer with square cutouts for each playing
+    // square. Sits behind the LEDs, replacing the dark accessory slab.
+    if (document.body.classList.contains('overlay-grid')) {
+      var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      var mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+      mask.setAttribute('id', 'square-holes');
+
+      // White = visible milky material, black = hole (see through to board)
+      var maskBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      maskBg.setAttribute('width', 700);
+      maskBg.setAttribute('height', 700);
+      maskBg.setAttribute('fill', 'white');
+      mask.appendChild(maskBg);
+
+      for (var r3 = 0; r3 < 8; r3++) {
+        for (var c3 = 0; c3 < 8; c3++) {
+          var hole = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          hole.setAttribute('x', c3 * SQ + 5);
+          hole.setAttribute('y', r3 * SQ + 5);
+          hole.setAttribute('width', SQ - 10);
+          hole.setAttribute('height', SQ - 10);
+          hole.setAttribute('fill', 'black');
+          mask.appendChild(hole);
+        }
+      }
+      defs.appendChild(mask);
+      ledsG.parentNode.insertBefore(defs, ledsG);
+
+      var milky = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      milky.setAttribute('width', 700);
+      milky.setAttribute('height', 700);
+      milky.setAttribute('fill', 'rgba(248,246,238,0.28)');
+      milky.setAttribute('mask', 'url(#square-holes)');
+      milky.setAttribute('id', 'milky-grid');
+      ledsG.parentNode.insertBefore(milky, ledsG);
     }
   }
 
@@ -1028,12 +1103,16 @@
       unflipBoard();
     });
 
-    // Scene 8: Dedication (80000 – 90000)
-    at(80000,  function () {
-      show('layer-dedication');
+    // Scene 8: Intro to dedication (78000 – 83000)
+    at(78000,  function () {
+      show('layer-intro-dedication');
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(90000,  function () {
+    at(83000,  function () {
+      hide('layer-intro-dedication');
+      show('layer-dedication');
+    });
+    at(93000,  function () {
       startNicknameCarousel();
     });
   }
