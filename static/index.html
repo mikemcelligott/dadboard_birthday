@@ -164,7 +164,6 @@
     gap: 2%;
     padding: 2%;
     z-index: 2;
-    transform: rotate(-4deg);
     /* columns/rows set inline by JS based on photo count */
   }
 
@@ -177,13 +176,13 @@
     border-radius: 3px;
     background: rgba(0,0,0,0.3);
     opacity: 0;
-    transform: scale(0.82) translateY(18px);
+    transform: scale(0.82) translateY(18px) rotate(var(--rotate, 0deg));
     transition: opacity 0.45s ease,
                 transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1),
                 filter 1.4s ease;
     box-shadow: 0 4px 14px rgba(0,0,0,0.5);
   }
-  .photo-tile.placed { opacity: 1; transform: scale(1) translateY(0); }
+  .photo-tile.placed { opacity: 1; transform: scale(1) translateY(0) rotate(var(--rotate, 0deg)); }
   /* "Settled" = the montage moment — all tiles desaturate together */
   #photo-display.settled .photo-tile { filter: grayscale(1) contrast(1.05) brightness(0.95); }
 
@@ -340,9 +339,9 @@
   }
 
   .move-label {
-    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-size: clamp(2rem, 5vw, 3.5rem);
     color: var(--ink);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.01em;
   }
   .move-sub {
     font-size: clamp(0.85rem, 2vw, 1.1rem);
@@ -505,11 +504,11 @@
 
   <!-- ── Text layers ──────────────────────────── -->
   <div class="layer" id="layer-opening-1">
-    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years..</div>
+    <div class="opening-prose serif">Fathers have been teaching sons the game of chess for thousands of years.</div>
   </div>
 
   <div class="layer" id="layer-opening-2">
-    <div class="opening-transition serif">And there's a new way to play.</div>
+    <div class="opening-transition serif">and there's a new way to play.</div>
   </div>
 
   <div class="layer" id="layer-title">
@@ -525,16 +524,15 @@
   </div>
 
   <div class="layer" id="layer-move">
-    <div class="move-label">It sees every move</div>
+    <div class="move-label">it sees every move</div>
   </div>
 
   <div class="layer" id="layer-capture">
-    <div class="move-label">Knows when a piece is taken</div>
-    <div class="move-sub">no camera, no RFID &nbsp; &middot; &nbsp; it just knows</div>
+    <div class="move-label">knows when a piece is taken</div>
   </div>
 
   <div class="layer" id="layer-f1">
-    <div class="feature serif">Rolls up</div>
+    <div class="feature serif">rolls up</div>
   </div>
   <div class="layer" id="layer-f2">
     <div class="feature serif">works with the pieces you already own</div>
@@ -543,7 +541,7 @@
     <div class="feature serif">teaches the game</div>
   </div>
   <div class="layer" id="layer-f4">
-    <div class="feature serif">and can be played across the room or the country</div>
+    <div class="feature serif">and can be played across the room or country</div>
   </div>
   <div class="layer" id="layer-f5">
     <div class="feature serif">at a fraction of the cost</div>
@@ -551,11 +549,16 @@
   </div>
 
   <div class="layer" id="layer-photo">
-    <div class="photo-line serif">The underside is yours.</div>
+    <div class="photo-line serif">with a customizable underside</div>
+  </div>
+
+  <div class="layer" id="layer-photo-2">
+    <div class="photo-line serif">it remembers more than just games</div>
   </div>
 
   <div class="layer" id="layer-intro-dedication">
-    <div class="dedication-intro serif">Introducing the dadboard, dedicated to the dad who made it all possible.</div>
+    <div class="dedication-intro serif" id="dedication-part1">Dedicated to dad who made it all possible</div>
+    <div class="dedication-intro serif" id="dedication-part2" style="opacity:0;transition:opacity 1.5s ease;margin-top:0.5rem">, the guy who always holds up the world for everyone around him</div>
   </div>
 
   <div class="layer" id="layer-dedication">
@@ -930,6 +933,9 @@
     photos.forEach(function (p, i) {
       var tile = document.createElement('div');
       tile.className = 'photo-tile';
+      // Vary the skew per tile for a loose, heterogeneous look
+      var skew = (Math.random() * 12 - 6).toFixed(1);
+      tile.style.setProperty('--rotate', skew + 'deg');
       var img = document.createElement('img');
       img.src = p.file; img.alt = '';
       img.onerror = function () { tile.style.display = 'none'; };
@@ -1001,7 +1007,7 @@
       document.getElementById('date-on-el').style.opacity = '1';   // "on June"
     });
     // Brief beat before the day number — the filing date reveal
-    at(15500,  function () {
+    at(14750,  function () {
       document.getElementById('date-day-el').style.opacity = '1';   // "13"
     });
     at(19500,  function () {
@@ -1069,7 +1075,7 @@
 
     // Scene 7: Photo scene — board flips, photos laid out on the back (58000 – 77000)
     at(58000,  function () {
-      show('layer-photo');
+      show('layer-photo');  // "with a customizable underside"
     });
     at(60000,  function () {
       // Flip the board to reveal the underside
@@ -1080,22 +1086,33 @@
       // Lay out all photos on the back at once, fast
       layoutPhotos();
     });
+    at(68000,  function () {
+      show('layer-photo-2');  // "it remembers more than just games"
+    });
+    at(74000,  function () {
+      hide('layer-photo-2');
+    });
     at(77000,  function () {
       // Clear photos, flip back
       clearPhotos();
       unflipBoard();
     });
 
-    // Scene 8: Intro to dedication (78000 – 83000)
+    // Scene 8: Dedication build-up (78000 – 95000)
     at(78000,  function () {
-      show('layer-intro-dedication');
+      show('layer-intro-dedication');  // "Dedicated to dad who made it all possible"
       document.getElementById('board-wrap').style.opacity = '0.3';
     });
-    at(83000,  function () {
+    at(84000,  function () {
+      // Beat — reveal the continuation
+      document.getElementById('dedication-part2').style.opacity = '1';
+    });
+    at(92000,  function () {
+      // Transition to final "dedicated to" reveal
       hide('layer-intro-dedication');
       show('layer-dedication');
     });
-    at(93000,  function () {
+    at(97000,  function () {
       startNicknameCarousel();
     });
   }
