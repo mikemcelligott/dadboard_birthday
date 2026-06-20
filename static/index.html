@@ -1533,13 +1533,17 @@
   }
 
   function startNicknameCarousel() {
-    // Show the first nickname immediately, then start rotating after 1.5s
-    if (nicknames.length > 0) {
-      nameEl.textContent = nicknames[0].name;
+    // Fade out the default name, swap to first nickname, fade in,
+    // then start rotating after 1.5s
+    nameEl.style.opacity = '0';
+    setTimeout(function () {
+      if (nicknames.length > 0) {
+        nameEl.textContent = nicknames[0].name;
+        nicknameIndex = 1;
+      }
       nameEl.style.opacity = '1';
-      nicknameIndex = 1;
-    }
-    carouselTimer = setTimeout(rotateNickname, 1500);
+      carouselTimer = setTimeout(rotateNickname, 1500);
+    }, 600);
   }
 
   function stopNicknameCarousel() {
